@@ -1,0 +1,27 @@
+OpenClaw UniFi — community integration
+
+Plugin implementation and artwork: Copyright (c) 2026 Baumus, MIT.
+
+Adapted code:
+  Repository: https://github.com/us-all/unifi-mcp-server
+  Pinned commit: 4a3e0163f470496b948bf6e54129dd65a3ebfb4e
+  License: MIT
+  Copyright (c) 2026 us-all
+  Original files: src/client.ts, src/connector-client.ts
+  Preserved copies and license: third_party/unifi-mcp-server/
+
+src/client.ts adapts the upstream class-based HTTP request flow, URLSearchParams
+encoding, X-API-KEY/Accept/Content-Type headers, JSON body handling, timeout
+pattern and HTTP 204 handling. The connector architecture is used without an
+MCP process. Mutations/methods and official routes are extended from the pinned
+official specifications. Base-URL/global configuration, GET-only connector,
+automatic retry and raw error-body exposure have been replaced.
+
+Official API specifications are public Ubiquiti documentation, downloaded from:
+  https://developer.ui.com/site-manager/v1.0.0/openapi.json
+  https://developer.ui.com/network/v10.6.106/openapi.json
+Exact bytes, dates and hashes: specs/provenance.json.
+They are included as upstream reference material; no claim of original authorship,
+ownership of UniFi/Ubiquiti marks, or upstream endorsement is made.
+MIT applies to this plugin's authored/adapted code, not a relicensing of trademarks
+or a representation that upstream API documentation has a separate MIT grant.

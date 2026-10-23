@@ -1,0 +1,133 @@
+{
+  "id": "unifi",
+  "name": "UniFi",
+  "version": "0.1.0",
+  "description": "Community tools for the official UniFi Site Manager and Network APIs, including Cloud Connector forwarding.",
+  "categories": [
+    "infrastructure"
+  ],
+  "activation": {
+    "onStartup": true
+  },
+  "skills": [
+    "./skills"
+  ],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "object",
+        "required": [
+          "source",
+          "provider",
+          "id"
+        ],
+        "properties": {
+          "source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "store"
+              },
+              {
+                "type": "string",
+                "const": "env"
+              },
+              {
+                "type": "string",
+                "const": "file"
+              },
+              {
+                "type": "string",
+                "const": "exec"
+              }
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "additionalProperties": false,
+        "description": "OpenClaw SecretRef only. Store the key through Settings → Secrets, then select its reference. Never paste a plaintext key here."
+      },
+      "requestTimeoutMs": {
+        "type": "integer",
+        "minimum": 100,
+        "maximum": 120000,
+        "default": 30000,
+        "description": "Whole request deadline, including response reading."
+      },
+      "maxResponseBytes": {
+        "type": "integer",
+        "minimum": 1024,
+        "maximum": 10485760,
+        "default": 10485760,
+        "description": "Bounded JSON response bytes; Cloud Connector upstream also limits responses to 10 MB."
+      }
+    },
+    "additionalProperties": false
+  },
+  "configContracts": {
+    "secretInputs": {
+      "paths": [
+        {
+          "path": "apiKey",
+          "expected": "string",
+          "ownerKind": "capability"
+        }
+      ]
+    }
+  },
+  "uiHints": {
+    "apiKey": {
+      "label": "UniFi API key reference",
+      "sensitive": true,
+      "help": "Use Settings → Secrets to save a Protected secret, then select its full store SecretRef. No plaintext keys in configuration. External env/file/exec SecretRefs are supported."
+    },
+    "requestTimeoutMs": {
+      "label": "Request timeout (milliseconds)",
+      "advanced": true
+    },
+    "maxResponseBytes": {
+      "label": "Maximum JSON response bytes",
+      "advanced": true
+    }
+  },
+  "contracts": {
+    "tools": [
+      "unifi_status",
+      "unifi_discover",
+      "unifi_describe",
+      "unifi_request",
+      "unifi_request_write"
+    ]
+  },
+  "toolMetadata": {
+    "unifi_status": {
+      "replaySafe": true,
+      "sideEffecting": false
+    },
+    "unifi_discover": {
+      "replaySafe": true,
+      "sideEffecting": false
+    },
+    "unifi_describe": {
+      "replaySafe": true,
+      "sideEffecting": false
+    },
+    "unifi_request": {
+      "replaySafe": true,
+      "sideEffecting": false
+    },
+    "unifi_request_write": {
+      "replaySafe": false,
+      "sideEffecting": true
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "name": "@baumus/openclaw-unifi",
+  "version": "0.1.0",
+  "description": "Community OpenClaw tools for the official UniFi Site Manager and Network APIs, with Cloud Connector forwarding.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "specs",
+    "assets",
+    "skills",
+    "openclaw.plugin.json",
+    "README.md",
+    "ARCHITECTURE.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "NOTICE",
+    "third_party"
+  ],
+  "scripts": {
+    "catalog:generate": "node scripts/generate-catalog.mjs",
+    "catalog:check": "node scripts/generate-catalog.mjs --check",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run catalog:check && tsc",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "plugin:build": "npm run build && openclaw plugins build --root . --entry ./dist/index.js",
+    "plugin:build:check": "openclaw plugins build --root . --entry ./dist/index.js --check",
+    "plugin:validate": "openclaw plugins validate --root . --entry ./dist/index.js --json",
+    "package:check": "node scripts/check-package.mjs",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=24.16.0 <25 || >=26.1.0"
+  },
+  "peerDependencies": {
+    "openclaw": "2026.10.5"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "typebox": "1.3.34"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "5.9.3"
+  },
+  "license": "MIT",
+  "author": "Baumus",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Baumus/openclaw-unifi.git"
+  },
+  "homepage": "https://github.com/Baumus/openclaw-unifi#readme",
+  "bugs": {
+    "url": "https://github.com/Baumus/openclaw-unifi/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "runtimeExtensions": [
+      "./dist/index.js"
+    ],
+    "compat": {
+      "pluginApi": "2026.10.5",
+      "minGatewayVersion": "2026.10.5"
+    },
+    "build": {
+      "openclawVersion": "2026.10.5",
+      "pluginSdkVersion": "2026.10.5"
+    }
+  }
+}

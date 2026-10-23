@@ -1,0 +1,67 @@
+# Architecture
+
+## Boundaries and data flow
+
+```text
+OpenClaw source config (SecretRef only)
+  → host secretInputs resolution / active runtime snapshot
+  → tool factory → currentConfig at execution time
+Agent JSON
+  → plain-JSON / complexity check
+  → official operation lookup + read/write surface
+  → path/query/body schema validation + pure URL/body planning
+  → current runtime credential + live invocation guard
+  → UniFiClient (fixed api.ui.com HTTPS, redirect:error, no retries)
+  → bounded stream → JSON → exact-key redaction → structured tool result
+```
+
+No network happens during registration, discovery, description or catalog generation. Request planning completes before runtime credential access. The token defines UniFi rights. OpenClaw defines tool permissions/approvals; the plugin does not introduce site/operation authorization lists.
+
+## Modules
+
+| File | Responsibility |
+| --- | --- |
+| `src/index.ts` | Focused SDK definePluginEntry; runtime factories plus the SDK's exported static tool metadata symbol for official build/validate |
+| `src/config.ts` | SecretRef-only source schema; latest runtime snapshot selection |
+| `src/catalog.ts` | Pinned catalog/spec loading and integrity; cursor discovery; complete schema closure |
+| `src/schema.ts` | Non-coercing AJV validation, OpenAPI normalization, discriminator/allOf inheritance; JSON bounds |
+| `src/request.ts` | Pure request validation, canonical routes, safe segments, OAS query serialization |
+| `src/client.ts` | Adapted upstream HTTP client; headers, deadline/cancellation, bounded reads and sanitized errors |
+| `src/tools.ts` | Five tool schemas/handlers and honest replay/side-effect metadata |
+
+The published entry is modular ESM JavaScript under `dist/`, never a TypeScript runtime entry. Resources resolve relative to the emitted modules. Runtime dependencies are declared explicitly. The package does not spawn an MCP process, use private OpenClaw internals, access raw host config or implement secret storage.
+
+## Specification source of truth
+
+* Site Manager: https://developer.ui.com/site-manager/v1.0.0/openapi.json
+* Network: https://developer.ui.com/network/v10.6.106/openapi.json
+* Exact downloaded bytes, SHA-256 and retrieval date: `specs/provenance.json`.
+* Deterministic derived catalog: `scripts/generate-catalog.mjs` → `specs/catalog.json`.
+
+Generation includes all GET/POST/PUT/PATCH/DELETE operations and merges path-item/operation parameters with operation overrides. Parameter/requestBody references resolve locally. Schema refs stay local; external refs fail closed. Generation rejects duplicate/missing operation IDs, unsupported parameter locations and media types rather than publishing dead entries. Source servers are never accepted as agent input. Network uses the first official cloud server, not its local-console alternative.
+
+Catalog discovery exposes all 87 operations. Read/write separation is mechanical: GET is replay-safe/non-side-effecting; all other methods are not. No classifier guesses whether a POST is harmless. Connector calls are generic, so endpoint-specific effects remain the caller's responsibility.
+
+## Schema handling
+
+AJV validates a normalized JSON Schema with all referenced definitions. No coercion, defaults insertion, property removal or implicit object closure occurs. OpenAPI nullable, refs, allOf, oneOf/anyOf and standard formats/bounds are supported. A discriminator mapping expands to oneOf branches with a required tag constant and its subtype. A subtype's allOf reference to its dispatching parent uses a non-dispatching base definition to avoid recursive dispatch, preserving inherited required fields and subtype properties.
+
+`unifi_describe` returns original request metadata plus all transitively referenced schemas and discriminator mappings, including recursive definitions without truncation. A schema-backed request validates path/query/body before reading the current credential. OAS schema constraints do not substitute for server business rules or encode every requirement described in prose.
+
+Query serialization follows OAS defaults: form + explode=true, repeated arrays, scalar objects; explicit spaceDelimited, pipeDelimited, deepObject and JSON-content serializers are also implemented. Nested object form values fail rather than silently stringify. Site Manager's literal `hostIds[]` key is preserved. API continuation tokens are ordinary string values passed without parsing; URLSearchParams encodes transport once.
+
+## URL and transport boundary
+
+Only `https://api.ui.com` is used. Site Manager paths already include `/v1`. Network prepends `/v1/connector/consoles/{consoleId}/proxy/network/integration`. Generic Connector* operations insert a canonical `proxy/{applicationPath}` suffix. No arbitrary origin, headers, credentials, redirects, raw percent-encoded paths, dot segments, slash-bearing IDs or query fragments in paths are accepted.
+
+Request JSON is bounded to 1 MiB, 48 nesting levels and 100,000 visited nodes. URLs are bounded to 32 KiB. Requests have a 30-second default whole-operation deadline (100ms–120s configurable) and caller cancellation. Response streaming is bounded to at most 10 MiB and a JSON sanitization complexity limit (64 levels / 200,000 visited values). Official connector upstream bounds still apply independently. Reads and fetch waits have explicit abort races; readers/bodies are cancelled after failure or completion. Mutations are never retried.
+
+## Secret lifecycle
+
+The manifest declares `apiKey` as `configContracts.secretInputs.paths` with `ownerKind: capability`. The host validates the reference in source config, resolves to an in-memory runtime string, and fails that capability cold on resolution failure. Tool calls use `getRuntimeConfig` first, then a supplied runtime snapshot, then registration's resolved `api.pluginConfig` only where no snapshot API exists. A present but unavailable/removed current snapshot never falls back.
+
+The exact tested host is OpenClaw 2026.10.5. Static metadata uses the exported SDK contract; metadata generation/validation and runtime-registration consistency are tested. Future host versions need a new compatibility validation, not a broader speculative version range.
+
+## Recovery and verification ownership
+
+Source/catalog regeneration is reversible. Restore the prior reviewed package if necessary; never replay an uncertain mutation as recovery. This implementation does not activate/install itself, write live config, publish, or certify independent readiness. Producer tests cover all catalog routes and failure classes; an independent owner reviews the exact candidate, and the operator separately validates real authentication, installation and UI behavior.
