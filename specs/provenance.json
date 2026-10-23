@@ -10,5 +10,29 @@
     "url": "https://developer.ui.com/network/v10.6.106/openapi.json",
     "sha256": "c91054d31bcefa38d7408cb12a975dd660a7304017d781ffdbc884caaf84c75d",
     "retrieved": "2026-10-23T20:25:54.896Z"
+  },
+  {
+    "file": "protect-v7.3.70.json",
+    "url": "https://developer.ui.com/protect/v7.3.70/openapi.json",
+    "sha256": "85caa3c70a5febd8ae2e4f90dbe31b8ad544fc9b74b6c02ca477c8af03d14dc6",
+    "retrieved": "2026-10-23T20:54:55.651850+00:00"
+  },
+  {
+    "file": "innerspace-v1.3.23.json",
+    "url": "https://developer.ui.com/innerspace/v1.3.23/openapi.json",
+    "sha256": "537a2c7620eaad80e13eeb23c983a9a1981fc32946e615e6055ecbb6abd9add3",
+    "retrieved": "2026-10-23T20:54:55.652252+00:00"
+  },
+  {
+    "file": "mobility-v1.0.0.json",
+    "url": "https://developer.ui.com/mobility/v1.0.0/openapi.json",
+    "sha256": "a82ffea0e14ee9b3bba342c9723b931d354d0a50477f2e24786faa1085677e1d",
+    "retrieved": "2026-10-23T20:54:55.652471+00:00"
+  },
+  {
+    "file": "carrier-fabric-v1.0.0.json",
+    "url": "https://developer.ui.com/carrier-fabric/v1.0.0/openapi.json",
+    "sha256": "83450354a6a8f9a681a8101d18d063d063ae81b96582a231de39c1482cad5378",
+    "retrieved": "2026-10-23T20:54:55.652728+00:00"
   }
 ]

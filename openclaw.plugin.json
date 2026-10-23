@@ -2,7 +2,7 @@
   "id": "unifi",
   "name": "UniFi",
   "version": "0.1.0",
-  "description": "Community tools for the official UniFi Site Manager and Network APIs, including Cloud Connector forwarding.",
+  "description": "Community tools for the official public UniFi APIs, including Cloud Connector and governed media.",
   "categories": [
     "infrastructure"
   ],

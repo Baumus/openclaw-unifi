@@ -1,7 +1,7 @@
 {
   "name": "@baumus/openclaw-unifi",
   "version": "0.1.0",
-  "description": "Community OpenClaw tools for the official UniFi Site Manager and Network APIs, with Cloud Connector forwarding.",
+  "description": "Community OpenClaw tools for the official public UniFi APIs, with Cloud Connector forwarding.",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -14,6 +14,7 @@
     "skills",
     "openclaw.plugin.json",
     "README.md",
+    "API_INVENTORY.md",
     "ARCHITECTURE.md",
     "SECURITY.md",
     "CONTRIBUTING.md",

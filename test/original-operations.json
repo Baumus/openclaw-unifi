@@ -1,0 +1,527 @@
+{
+  "baseline": "f34eb7914ec0f5f59b2ecc1a8038b241021880f4",
+  "operations": [
+    {
+      "operationId": "adoptDevice",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/devices"
+    },
+    {
+      "operationId": "ConnectorDelete",
+      "api": "site-manager",
+      "method": "DELETE",
+      "path": "/v1/connector/consoles/{id}/*path"
+    },
+    {
+      "operationId": "ConnectorGet",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/connector/consoles/{id}/*path"
+    },
+    {
+      "operationId": "ConnectorPatch",
+      "api": "site-manager",
+      "method": "PATCH",
+      "path": "/v1/connector/consoles/{id}/*path"
+    },
+    {
+      "operationId": "ConnectorPost",
+      "api": "site-manager",
+      "method": "POST",
+      "path": "/v1/connector/consoles/{id}/*path"
+    },
+    {
+      "operationId": "ConnectorPut",
+      "api": "site-manager",
+      "method": "PUT",
+      "path": "/v1/connector/consoles/{id}/*path"
+    },
+    {
+      "operationId": "createAclRule",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/acl-rules"
+    },
+    {
+      "operationId": "createDnsPolicy",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/dns/policies"
+    },
+    {
+      "operationId": "createFirewallPolicy",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/firewall/policies"
+    },
+    {
+      "operationId": "createFirewallZone",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/firewall/zones"
+    },
+    {
+      "operationId": "createNetwork",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/networks"
+    },
+    {
+      "operationId": "createTrafficMatchingList",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/traffic-matching-lists"
+    },
+    {
+      "operationId": "createVouchers",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/hotspot/vouchers"
+    },
+    {
+      "operationId": "createWifiBroadcast",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/wifi/broadcasts"
+    },
+    {
+      "operationId": "deleteAclRule",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/acl-rules/{aclRuleId}"
+    },
+    {
+      "operationId": "deleteDnsPolicy",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/dns/policies/{dnsPolicyId}"
+    },
+    {
+      "operationId": "deleteFirewallPolicy",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+      "operationId": "deleteFirewallZone",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/firewall/zones/{firewallZoneId}"
+    },
+    {
+      "operationId": "deleteNetwork",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/networks/{networkId}"
+    },
+    {
+      "operationId": "deleteTrafficMatchingList",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/traffic-matching-lists/{trafficMatchingListId}"
+    },
+    {
+      "operationId": "deleteVoucher",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/hotspot/vouchers/{voucherId}"
+    },
+    {
+      "operationId": "deleteVouchers",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/hotspot/vouchers"
+    },
+    {
+      "operationId": "deleteWifiBroadcast",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/wifi/broadcasts/{wifiBroadcastId}"
+    },
+    {
+      "operationId": "executeAdoptedDeviceAction",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/devices/{deviceId}/actions"
+    },
+    {
+      "operationId": "executeConnectedClientAction",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/clients/{clientId}/actions"
+    },
+    {
+      "operationId": "executePortAction",
+      "api": "network",
+      "method": "POST",
+      "path": "/v1/sites/{siteId}/devices/{deviceId}/interfaces/ports/{portIdx}/actions"
+    },
+    {
+      "operationId": "getAclRule",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/acl-rules/{aclRuleId}"
+    },
+    {
+      "operationId": "getAclRuleOrdering",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/acl-rules/ordering"
+    },
+    {
+      "operationId": "getAclRulePage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/acl-rules"
+    },
+    {
+      "operationId": "getAdoptedDeviceDetails",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/devices/{deviceId}"
+    },
+    {
+      "operationId": "getAdoptedDeviceLatestStatistics",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/devices/{deviceId}/statistics/latest"
+    },
+    {
+      "operationId": "getAdoptedDeviceOverviewPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/devices"
+    },
+    {
+      "operationId": "getConnectedClientDetails",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/clients/{clientId}"
+    },
+    {
+      "operationId": "getConnectedClientOverviewPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/clients"
+    },
+    {
+      "operationId": "getCountries",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/countries"
+    },
+    {
+      "operationId": "getDeviceTagPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/device-tags"
+    },
+    {
+      "operationId": "getDnsPolicy",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/dns/policies/{dnsPolicyId}"
+    },
+    {
+      "operationId": "getDnsPolicyPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/dns/policies"
+    },
+    {
+      "operationId": "getDpiApplicationCategories",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/dpi/categories"
+    },
+    {
+      "operationId": "getDpiApplications",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/dpi/applications"
+    },
+    {
+      "operationId": "getFirewallPolicies",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/firewall/policies"
+    },
+    {
+      "operationId": "getFirewallPolicy",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+      "operationId": "getFirewallPolicyOrdering",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/firewall/policies/ordering"
+    },
+    {
+      "operationId": "getFirewallZone",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/firewall/zones/{firewallZoneId}"
+    },
+    {
+      "operationId": "getFirewallZones",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/firewall/zones"
+    },
+    {
+      "operationId": "getHostByID",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/hosts/{id}"
+    },
+    {
+      "operationId": "getInfo",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/info"
+    },
+    {
+      "operationId": "getISPMetrics",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/isp-metrics/{type}"
+    },
+    {
+      "operationId": "getLag",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/switching/lags/{lagId}"
+    },
+    {
+      "operationId": "getLagPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/switching/lags"
+    },
+    {
+      "operationId": "getMcLagDomain",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/switching/mc-lag-domains/{mcLagDomainId}"
+    },
+    {
+      "operationId": "getMcLagDomainPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/switching/mc-lag-domains"
+    },
+    {
+      "operationId": "getNetworkDetails",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/networks/{networkId}"
+    },
+    {
+      "operationId": "getNetworkReferences",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/networks/{networkId}/references"
+    },
+    {
+      "operationId": "getNetworksOverviewPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/networks"
+    },
+    {
+      "operationId": "getPendingDevicePage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/pending-devices"
+    },
+    {
+      "operationId": "getRadiusProfileOverviewPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/radius/profiles"
+    },
+    {
+      "operationId": "getSDWanConfigByID",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/sd-wan-configs/{id}"
+    },
+    {
+      "operationId": "getSDWanConfigStatus",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/sd-wan-configs/{id}/status"
+    },
+    {
+      "operationId": "getSiteOverviewPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites"
+    },
+    {
+      "operationId": "getSiteToSiteVpnTunnelPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/vpn/site-to-site-tunnels"
+    },
+    {
+      "operationId": "getSwitchStack",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/switching/switch-stacks/{switchStackId}"
+    },
+    {
+      "operationId": "getSwitchStackPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/switching/switch-stacks"
+    },
+    {
+      "operationId": "getTrafficMatchingList",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/traffic-matching-lists/{trafficMatchingListId}"
+    },
+    {
+      "operationId": "getTrafficMatchingLists",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/traffic-matching-lists"
+    },
+    {
+      "operationId": "getVoucher",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/hotspot/vouchers/{voucherId}"
+    },
+    {
+      "operationId": "getVouchers",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/hotspot/vouchers"
+    },
+    {
+      "operationId": "getVpnServerPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/vpn/servers"
+    },
+    {
+      "operationId": "getWansOverviewPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/wans"
+    },
+    {
+      "operationId": "getWifiBroadcastDetails",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/wifi/broadcasts/{wifiBroadcastId}"
+    },
+    {
+      "operationId": "getWifiBroadcastPage",
+      "api": "network",
+      "method": "GET",
+      "path": "/v1/sites/{siteId}/wifi/broadcasts"
+    },
+    {
+      "operationId": "listDevices",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/devices"
+    },
+    {
+      "operationId": "listHosts",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/hosts"
+    },
+    {
+      "operationId": "listSDWanConfigs",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/sd-wan-configs"
+    },
+    {
+      "operationId": "listSites",
+      "api": "site-manager",
+      "method": "GET",
+      "path": "/v1/sites"
+    },
+    {
+      "operationId": "patchFirewallPolicy",
+      "api": "network",
+      "method": "PATCH",
+      "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+      "operationId": "queryISPMetrics",
+      "api": "site-manager",
+      "method": "POST",
+      "path": "/v1/isp-metrics/{type}/query"
+    },
+    {
+      "operationId": "removeDevice",
+      "api": "network",
+      "method": "DELETE",
+      "path": "/v1/sites/{siteId}/devices/{deviceId}"
+    },
+    {
+      "operationId": "updateAclRule",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/acl-rules/{aclRuleId}"
+    },
+    {
+      "operationId": "updateAclRuleOrdering",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/acl-rules/ordering"
+    },
+    {
+      "operationId": "updateDnsPolicy",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/dns/policies/{dnsPolicyId}"
+    },
+    {
+      "operationId": "updateFirewallPolicy",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/firewall/policies/{firewallPolicyId}"
+    },
+    {
+      "operationId": "updateFirewallPolicyOrdering",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/firewall/policies/ordering"
+    },
+    {
+      "operationId": "updateFirewallZone",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/firewall/zones/{firewallZoneId}"
+    },
+    {
+      "operationId": "updateNetwork",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/networks/{networkId}"
+    },
+    {
+      "operationId": "updateTrafficMatchingList",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/traffic-matching-lists/{trafficMatchingListId}"
+    },
+    {
+      "operationId": "updateWifiBroadcast",
+      "api": "network",
+      "method": "PUT",
+      "path": "/v1/sites/{siteId}/wifi/broadcasts/{wifiBroadcastId}"
+    }
+  ]
+}

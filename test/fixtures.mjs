@@ -16,7 +16,9 @@ export function sample(api,schema={},depth=0){
   if(d?.mapping){const [tag,ref]=Object.entries(d.mapping)[0];selector[d.propertyName]=tag;collect({$ref:ref});}
  }
  for(const n of nodes){if(n.oneOf?.length)return sample(api,n.oneOf[0],depth+1);if(n.anyOf?.length)return sample(api,n.anyOf[0],depth+1);}
- const type=nodes.find(n=>n.type)?.type;
+ let type=nodes.find(n=>n.type)?.type;
+ if(Array.isArray(type))type=type.find(t=>t!=="null");
+ const constant=nodes.find(n=>n.const!==undefined);if(constant)return constant.const;
  const enumNode=nodes.find(n=>n.enum?.length);
  if(enumNode && type!=="object" && !nodes.some(n=>n.properties))return enumNode.enum[0];
  if(nodes.some(n=>n.properties) || type==="object"){
@@ -37,7 +39,7 @@ export function sample(api,schema={},depth=0){
 }
 export function inputFor(op){
  const input={operationId:op.operationId};
- if(op.api==="network")input.consoleId="console:123";
+ if(["network","protect","innerspace"].includes(op.api))input.consoleId="console:123";
  const path={},query={};
  for(const p of op.parameters){
   if(p.in==="path")path[p.name]=p.name==="path"?"network/integration/v1/sites":sample(op.api,p.schema);
@@ -45,6 +47,7 @@ export function inputFor(op){
  }
  if(Object.keys(path).length)input.path=path;
  if(Object.keys(query).length)input.query=query;
- if(op.requestBody)input.body=sample(op.api,op.requestBody.content["application/json"].schema??{});
+ if(op.requestBody?.content["application/json"])input.body=sample(op.api,op.requestBody.content["application/json"].schema??{});
+ if(op.requestBody?.content["multipart/form-data"])input.media={ref:"inbound:"+uuid+".png",mime:"image/png"};
  return input;
 }

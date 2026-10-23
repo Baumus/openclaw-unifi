@@ -3,7 +3,7 @@ import { toolPluginMetadataSymbol, type ToolPluginMetadata } from "openclaw/plug
 import { ConfigSchema } from "./config.js";
 import { createTool, toolDefinitions } from "./tools.js";
 
-const identity = { id: "unifi", name: "UniFi", description: "Community tools for the official UniFi Site Manager and Network APIs, including Cloud Connector forwarding." };
+const identity = { id: "unifi", name: "UniFi", description: "Community tools for the official public UniFi APIs, including Cloud Connector and governed media." };
 const configJson: Record<string, unknown> = JSON.parse(JSON.stringify(ConfigSchema));
 const entry = definePluginEntry({
   ...identity,

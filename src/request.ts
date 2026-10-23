@@ -1,4 +1,5 @@
-import { operation } from "./catalog.js";
+import { operation, isConsoleApi } from "./catalog.js";
+import { validateMediaInput } from "./media.js";
 import { fail } from "./errors.js";
 import { validatePlainJson, validateValue } from "./schema.js";
 import type { Parameter, RequestInput, RequestPlan } from "./types.js";
@@ -17,6 +18,7 @@ export function connectorPath(value: unknown): string {
   if (text.startsWith("proxy/")) text = text.slice(6);
   const parts = text.split("/");
   if (parts.length < 2 || parts.some(s => !/^[A-Za-z0-9._~-]+$/.test(s) || s === "." || s === "..")) fail("invalid_connector_path");
+  if (parts[0] === "protect" && parts[1] === "integration" && parts[2] === "v1" && parts[3] === "subscribe") fail("upstream_unavailable");
   return "proxy/" + parts.map(safeSegment).join("/");
 }
 function scalar(value: unknown): string {
@@ -47,11 +49,12 @@ export function appendQuery(url: URL, p: Parameter, value: unknown): void {
 /** Pure planning: invalid requests fail before runtime credentials or network. */
 export function prepareRequest(input: RequestInput, write: boolean): RequestPlan {
   validatePlainJson(input);
-  if (Object.keys(input).some(k => !["operationId","consoleId","path","query","body"].includes(k))) fail("unknown_request_field");
+  if (Object.keys(input).some(k => !["operationId","consoleId","path","query","body","media"].includes(k))) fail("unknown_request_field");
   const op = operation(input.operationId);
+  if (op.availability.status !== "supported") fail("upstream_unavailable");
   if ((op.method !== "GET") !== write) fail("wrong_request_tool");
   const wildcard = op.path.endsWith("/*path");
-  if (op.api !== "network" && input.consoleId !== undefined) fail("irrelevant_console_id");
+  if (!isConsoleApi(op.api) && input.consoleId !== undefined) fail("irrelevant_console_id");
   const path = input.path ?? {}, query = input.query ?? {};
   if (!path || typeof path !== "object" || Array.isArray(path) || !query || typeof query !== "object" || Array.isArray(query)) fail("invalid_parameters");
   const pathParams = op.parameters.filter(p => p.in === "path"), queryParams = op.parameters.filter(p => p.in === "query");
@@ -64,7 +67,7 @@ export function prepareRequest(input: RequestInput, write: boolean): RequestPlan
   }
   let relative = op.path.replace(/\{([^}]+)\}/g, (_, key: string) => safeSegment(path[key]));
   if (wildcard) relative = relative.replace("*path", connectorPath(path.path));
-  const prefix = op.api === "network" ? "/v1/connector/consoles/" + safeSegment(input.consoleId) + "/proxy/network/integration" : "";
+  const prefix = isConsoleApi(op.api) ? new URL(op.transport.replace("{consoleId}", safeSegment(input.consoleId))).pathname : "";
   const url = new URL(API_ORIGIN + prefix + relative);
   for (const [key, value] of Object.entries(query)) {
     if (key.length > 256) fail("invalid_query");
@@ -72,13 +75,19 @@ export function prepareRequest(input: RequestInput, write: boolean): RequestPlan
   }
   if (url.href.length > 32768) fail("request_url_too_large");
   let body: string | undefined;
+  const multipart = !!op.requestBody?.content["multipart/form-data"];
+  if (multipart) {
+    if (input.body !== undefined) fail("unexpected_body");
+    validateMediaInput(input.media);
+  } else if (input.media !== undefined) fail("unexpected_media");
   if (input.body !== undefined) {
     // Connector DELETE has no requestBody in the snapshot. Permit JSON forwarding
     // as an explicit extension; all other operations follow their declared schema.
     if (!op.requestBody && !(wildcard && op.method === "DELETE")) fail("unexpected_body");
     validateValue(op.api, op.requestBody?.content["application/json"]?.schema ?? {}, input.body);
     body = validatePlainJson(input.body);
-  } else if (op.requestBody?.required) fail("missing_body");
+  } else if (!multipart && op.requestBody?.required) fail("missing_body");
   if (url.origin !== API_ORIGIN || url.username || url.password || url.hash) fail("invalid_destination");
-  return { operationId: op.operationId, method: op.method, url, body };
+  const responseMedia = [...new Set(Object.entries(op.responses).filter(([code]) => /^2/.test(code)).flatMap(([,value]) => Object.keys((value as any).content ?? {})).filter(mime => mime === "image/jpeg" || mime === "image/png"))];
+  return { operationId: op.operationId, method: op.method, url, body, ...(multipart ? {upload:input.media} : {}), ...(responseMedia.length ? {responseMedia} : {}) };
 }

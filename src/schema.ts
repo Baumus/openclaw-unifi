@@ -31,7 +31,25 @@ export function normalizeSchema(api: string, schema: JsonSchema, owner?: string,
     const isInheritedBase = !!owner && Object.values(parent.discriminator?.mapping ?? {}).some(ref => ref === prefix + owner);
     out.$ref = "#/definitions/" + pointer(name + (isInheritedBase ? "__base" : ""));
   }
-  if (schema.properties) out.properties = Object.fromEntries(Object.entries(schema.properties).map(([key,value]) => [key, normalizeSchema(api, value as JsonSchema)]));
+  // Protect emits closed allOf request wrappers without property declarations.
+  // Project inherited names onto that closure; constraints remain in allOf.
+  // This is explicit OAS inheritance normalization, never implicit closure.
+  if (schema.additionalProperties === false && schema.allOf) {
+    const names = new Set<string>(), seen = new Set<string>();
+    function collect(node: JsonSchema) {
+      if (node.$ref && !seen.has(node.$ref)) {
+        seen.add(node.$ref);
+        const name = node.$ref.slice("#/components/schemas/".length).replace(/~1/g,"/").replace(/~0/g,"~");
+        const target = specs[api]?.components?.schemas?.[name];
+        if (target) collect(target);
+      }
+      for (const name of Object.keys(node.properties ?? {})) names.add(name);
+      for (const child of node.allOf ?? []) collect(child);
+    }
+    collect(schema);
+    out.properties = Object.fromEntries([...names].map(name => [name, {}]));
+  }
+  if (schema.properties) out.properties = {...out.properties, ...Object.fromEntries(Object.entries(schema.properties).map(([key,value]) => [key, normalizeSchema(api, value as JsonSchema)]))};
   for (const key of ["items", "additionalProperties", "not"]) if (schema[key] && typeof schema[key] === "object") out[key] = normalizeSchema(api, schema[key]);
   for (const key of ["allOf", "anyOf", "oneOf"]) if (schema[key]) out[key] = schema[key].map((s: JsonSchema) => normalizeSchema(api, s, key === "allOf" ? owner : undefined));
   if (!base && schema.discriminator?.mapping) {

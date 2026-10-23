@@ -1,6 +1,6 @@
 # UniFi for OpenClaw
 
-Community OpenClaw plugin providing agent tools for the **official UniFi Site Manager and Network APIs**. No MCP server or subprocess is required. Not affiliated with, endorsed by, or an official product of Ubiquiti.
+Community OpenClaw plugin providing agent tools for the **official public UniFi APIs**. No MCP server or subprocess is required. Not affiliated with, endorsed by, or an official product of Ubiquiti.
 
 Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.1.0`  
 Tested host: **OpenClaw 2026.10.5 only** (experimental plugin SDK). Node 24.16+ or 26.1+.
@@ -11,15 +11,23 @@ Tested host: **OpenClaw 2026.10.5 only** (experimental plugin SDK). Node 24.16+ 
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Site Manager v1.0.0 | 9 | 2 | 1 | 1 | 1 | 14 |
 | Network v10.6.106 | 41 | 12 | 9 | 1 | 10 | 73 |
-| Total | 50 | 14 | 10 | 2 | 11 | 87 |
+| Protect v7.3.70 | 38 | 19 | 0 | 15 | 2 | 74 |
+| InnerSpace v1.3.23 | 6 | 0 | 0 | 0 | 0 | 6 |
+| Mobility v1.0.0 | 5 | 0 | 3 | 0 | 0 | 8 |
+| Carrier Fabric v1.0.0 | 4 | 3 | 2 | 1 | 1 | 11 |
+| Total | 103 | 36 | 15 | 18 | 14 | 186 |
 
-Every catalog operation is executable, including network configuration writes, actions and deletes. Five Site Manager operations are generic **Cloud Connector GET, POST, PUT, PATCH and DELETE** forwarding. There are no plugin-side site, operation or read-only permission filters: your UniFi API key defines API rights, alongside OpenClaw's core tool policy.
+**184 supported REST operations; two Protect WebSocket subscriptions are discoverable but upstream-unavailable.** All supported operations are executable, including network configuration writes, actions and deletes. Five Site Manager operations are generic **Cloud Connector GET, POST, PUT, PATCH and DELETE** forwarding. There are no plugin-side site, operation or read-only permission filters: your UniFi API key defines API rights, alongside OpenClaw's core tool policy.
 
 Network uses the official cloud server:
 `https://api.ui.com/v1/connector/consoles/{consoleId}/proxy/network/integration`.
 Local controllers are not contacted.
 
-Generic connector forwarding can call JSON REST application endpoints, including future endpoints, through this same fixed origin. It validates the forwarding envelope, not another application's endpoint schema. It is **not comprehensive schema coverage of Protect, Access, InnerSpace, Talk or the UniFi ecosystem**, and does not implement binary media, live camera streams, WebSockets, legacy private controller APIs, cookies or arbitrary URLs.
+Protect and InnerSpace use their official Cloud Connector servers with the same prefix and their application name. Mobility and Carrier Fabric use their source paths directly at api.ui.com. No local-controller fallback is implemented.
+
+All six official portal services have complete pinned schema coverage. See [API_INVENTORY.md](API_INVENTORY.md) for exact sources, stable derived IDs, binary endpoints and explicit upstream exclusions. The original 87 IDs are preserved; added APIs use `<api>:<sourceOperationId>` or, for sources without IDs, `<api>:<lowercase-method>:<exact-path>`.
+
+Generic connector forwarding also accepts documented JSON REST application paths. It validates the forwarding envelope, not an application's schema. It does not add guessed Access/Talk/Connect schemas, live media streaming, WebSockets, private controller APIs, cookies or arbitrary URLs.
 
 Official Cloud Connector requirements include console firmware >=5.0.3, console ownership/organization rights, 100 requests/minute/console, a 25-second upstream deadline and a 10 MB upstream response limit. Upstream capabilities and availability still depend on the console, application version, API key and service.
 
@@ -72,7 +80,7 @@ An unavailable/removed current credential fails closed. Tools use the latest hos
 | `unifi_status` | Local availability and pinned coverage; no network |
 | `unifi_discover` | Search/list operation IDs using `search`, `api`, `method`, `limit`, `cursor` |
 | `unifi_describe` | Complete operation metadata, required fields, request schemas, all referenced schemas/discriminator variants, response metadata |
-| `unifi_request` | GET operations only |
+| `unifi_request` | Supported GET operations; JSON or opaque private image reference |
 | `unifi_request_write` | POST/PUT/PATCH/DELETE operations; side-effecting and not replay-safe |
 
 First **discover → describe → request**. Never guess operation IDs or request shapes.
@@ -112,11 +120,31 @@ The connector normalizes an optional leading `/proxy/` and uses the canonical `/
 
 Form-style object query parameters support scalar property values; nested object form encoding is undefined by OpenAPI and is rejected. The Network `getDeviceTagPage.filter` schema is a structured FilterExpression, unlike other string filters. If an application actually requires its textual filter DSL, use the generic connector with the documented DSL; the plugin does not silently coerce/replace the published schema.
 
+## Governed media
+
+Describe the operation first. Image downloads return only `{media:{ref:"unifi:<host-store-id>",mime,size}}` in the normal result, with no bytes, base64, local path or provider URL. This is a plugin media-store reference, not an arbitrary URL or a globally resolvable filesystem path. JPEG and PNG are accepted only where declared by the source response. The plugin never follows returned stream/image URLs.
+
+Example snapshot request to `unifi_request`:
+
+```json
+{"operationId":"protect:get:/v1/cameras/{id}/snapshot","consoleId":"<console ID>","path":{"id":"<camera ID>"}}
+```
+
+For an explicitly authorized upload, use `unifi_request_write` with a host-governed inbound media-store ID (or a previously returned `unifi:` reference):
+
+```json
+{"operationId":"protect:post:/v1/files/{fileType}","consoleId":"<console ID>","path":{"fileType":"animations"},"media":{"ref":"inbound:<host-store-id>","mime":"image/gif"}}
+```
+
+The host must first ingest the user's attachment through its governed media flow. Use the resulting store ID, not its local path; this plugin has no arbitrary file/URL ingest tool. Anonymous UUID IDs and safe filename-prefixed host IDs are accepted. Uploads accept only the seven MIME types listed in [API_INVENTORY.md](API_INVENTORY.md), independently sniff bytes, use one `file` multipart part and a generated filename/boundary. The exact multipart part convention is not specified upstream and remains unverified against a real console.
+
+Media is limited to **5 MiB**, additionally bounded by `maxResponseBytes` for downloads. Upload preparation has a 30-second cap plus caller cancellation; the configured network deadline applies after preparation. The supported OpenClaw media-store SDK creates a private `media/unifi` directory and atomically saves downloads under random IDs; SDK read guards bind uploads to an opened store file and reject path/symlink escapes. Stored images persist under host media lifecycle/retention rules; the plugin does not independently delete them. Protect subscription operations return `upstream_unavailable` before credentials/network.
+
 ## Writes and failure handling
 
 A configured key, successful discovery, or broad troubleshooting request does **not** imply authorization to change anything. The bundled skill instructs the agent to obtain explicit authorization for the exact action/target/consequences. OpenClaw's core tool permissions and approvals remain authoritative; this plugin adds no separate approval workflow.
 
-All non-GET operations are conservatively marked side-effecting and not replay-safe, including `queryISPMetrics` (a semantically read-like POST). There is **no automatic retry**, even for GET/rate limits. Mutation timeouts, cancellations, transport failures and server errors can have an unknown outcome: inspect current state before deciding whether any further mutation is appropriate.
+Mobility PUT is full replacement, not a patch: read the complete resource, modify only authorized fields, then submit the complete intended representation. All non-GET operations are conservatively marked side-effecting and not replay-safe, including `queryISPMetrics` (a semantically read-like POST). There is **no automatic retry**, even for GET/rate limits. Mutation timeouts, cancellations, transport failures and server errors can have an unknown outcome: inspect current state before deciding whether any further mutation is appropriate.
 
 Errors are structured codes/status only; no upstream response body, credentials, headers, URLs or stack traces are emitted. Successful JSON data is returned to the agent and can contain private network details or Wi-Fi credentials; request only what you need and treat API data as untrusted. Exact API-key echoes are redacted. See [SECURITY.md](SECURITY.md).
 
@@ -135,7 +163,7 @@ npm run plugin:validate
 npm run package:check
 ```
 
-Tests use synthetic credentials and mocked transport; no real API key or house/network data is required. All 87 operations are exercised through the actual tools, not just counted. Credentialed service behavior, runtime installation and the actual Settings interaction require separate operator validation.
+Tests use synthetic credentials and mocked transport; no real API key or house/network data is required. All 184 supported operations are exercised through the actual tools, not just counted; both excluded subscriptions are verified to fail closed. The catalog contains 186 operations. Credentialed service behavior, runtime installation and the actual Settings interaction require separate operator validation.
 
 Specs, retrieval timestamps and SHA-256 provenance are checked in under `specs/`. `npm run catalog:generate` deterministically regenerates the catalog; `npm run catalog:check` rejects drift. See [ARCHITECTURE.md](ARCHITECTURE.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 

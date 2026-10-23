@@ -1,0 +1,80 @@
+{
+  "checked": "2026-10-23",
+  "portal": "https://developer.ui.com/",
+  "publicServices": [
+    "network",
+    "protect",
+    "mobility",
+    "innerspace",
+    "site-manager",
+    "carrier-fabric"
+  ],
+  "apis": [
+    {
+      "api": "site-manager",
+      "version": "v1.0.0",
+      "total": 14,
+      "supported": 14,
+      "transport": "https://api.ui.com"
+    },
+    {
+      "api": "network",
+      "version": "v10.6.106",
+      "total": 73,
+      "supported": 73,
+      "transport": "https://api.ui.com/v1/connector/consoles/{consoleId}/proxy/network/integration"
+    },
+    {
+      "api": "protect",
+      "version": "v7.3.70",
+      "total": 74,
+      "supported": 72,
+      "transport": "https://api.ui.com/v1/connector/consoles/{consoleId}/proxy/protect/integration"
+    },
+    {
+      "api": "innerspace",
+      "version": "v1.3.23",
+      "total": 6,
+      "supported": 6,
+      "transport": "https://api.ui.com/v1/connector/consoles/{consoleId}/proxy/innerspace/integration"
+    },
+    {
+      "api": "mobility",
+      "version": "v1.0.0",
+      "total": 8,
+      "supported": 8,
+      "transport": "https://api.ui.com"
+    },
+    {
+      "api": "carrier-fabric",
+      "version": "v1.0.0",
+      "total": 11,
+      "supported": 11,
+      "transport": "https://api.ui.com"
+    }
+  ],
+  "unavailable": [
+    {
+      "operationId": "protect:get:/v1/subscribe/devices",
+      "reason": "WebSocket subscription; Cloud Connector does not support this protocol",
+      "source": "https://developer.ui.com/protect/v7.3.70/get-v1subscribedevices"
+    },
+    {
+      "operationId": "protect:get:/v1/subscribe/events",
+      "reason": "WebSocket subscription; Cloud Connector does not support this protocol",
+      "source": "https://developer.ui.com/protect/v7.3.70/get-v1subscribeevents"
+    }
+  ],
+  "exclusions": [
+    {
+      "surface": "Access, Talk, Connect and other unlisted applications",
+      "reason": "Not listed among the six public services in the official portal inventory inspected on 2026-10-23; no public api.ui.com OpenAPI contract established. This is not a claim that private/local APIs do not exist. No guessed schema-backed operations added.",
+      "source": "https://developer.ui.com/"
+    },
+    {
+      "surface": "Direct controller/private legacy APIs, WebSocket/RTSPS/WebRTC media transport",
+      "reason": "Not REST operations supported through the pinned api.ui.com contracts. REST operations returning stream/session metadata remain supported; returned URLs are data only and never followed. No local/home-network fallback.",
+      "source": "https://developer.ui.com/protect/v7.3.70/gettingstarted"
+    }
+  ]
+}

@@ -7,11 +7,12 @@
  * runtime credential, no retries/global config, strict redirect and byte bounds,
  * cancellation and sanitized errors. Original files and license: third_party/.
  */
+import { hostMediaIO, storeImage, MAX_MEDIA_BYTES, type MediaIO } from "./media.js";
 import { UniFiError, fail } from "./errors.js";
 import { API_ORIGIN } from "./request.js";
 import type { RequestPlan, RuntimeConfig } from "./types.js";
 
-export type TransportOptions = { fetch?: typeof fetch; assertCurrent?: () => void };
+export type TransportOptions = { fetch?: typeof fetch; assertCurrent?: () => void; media?: MediaIO };
 export function runtimeLimits(config: RuntimeConfig) {
   const timeoutMs = config.requestTimeoutMs ?? 30_000;
   const maxBytes = config.maxResponseBytes ?? 10 * 1024 * 1024;
@@ -58,8 +59,8 @@ export class UniFiClient {
     const outcome = mutation ? "unknown" as const : undefined;
     const timeout = AbortSignal.timeout(timeoutMs);
     const signal = callerSignal ? AbortSignal.any([timeout, callerSignal]) : timeout;
-    const headers: Record<string, string> = { "X-API-KEY": apiKey, Accept: "application/json" };
-    if (plan.body !== undefined) headers["Content-Type"] = "application/json";
+    const headers: Record<string, string> = { "X-API-KEY": apiKey, Accept: plan.responseMedia?.join(", ") ?? "application/json" };
+    if (typeof plan.body === "string") headers["Content-Type"] = "application/json";
     const controller = new AbortController();
     const requestSignal = AbortSignal.any([signal, controller.signal]);
     let response: Response | undefined;
@@ -76,8 +77,12 @@ export class UniFiClient {
       }), signal);
       if (response.status >= 300 && response.status < 400) throw new UniFiError("redirect_rejected", response.status, outcome);
       if (!response.ok) throw new UniFiError("http_error", response.status, response.status >= 500 ? outcome : undefined);
+      const mime = response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+      if (plan.responseMedia && (!mime || !plan.responseMedia.includes(mime))) throw new UniFiError("unsupported_media_response",response.status,outcome);
+      const responseLimit = plan.responseMedia ? Math.min(maxBytes,MAX_MEDIA_BYTES) : maxBytes;
       const length = response.headers.get("content-length");
-      if (length !== null && Number(length) > maxBytes) throw new UniFiError("response_too_large", response.status, outcome);
+      if (length !== null && Number(length) > responseLimit) throw new UniFiError("response_too_large", response.status, outcome);
+      if (plan.responseMedia && (response.status === 204 || !response.body)) throw new UniFiError("invalid_media_size",response.status,outcome);
       if (response.status === 204 || !response.body) return { ok: true as const, status: response.status, data: null };
       const reader = response.body.getReader();
       const chunks: Uint8Array[] = [];
@@ -88,13 +93,20 @@ export class UniFiClient {
           const chunk = await abortable(reader.read(), signal);
           if (chunk.done) break;
           bytes += chunk.value.byteLength;
-          if (bytes > maxBytes) throw new UniFiError("response_too_large", response.status, outcome);
+          if (bytes > responseLimit) throw new UniFiError("response_too_large", response.status, outcome);
           chunks.push(chunk.value);
         }
       } finally { void reader.cancel().catch(() => {}); reader.releaseLock(); }
       signal.throwIfAborted();
+      if (plan.responseMedia && bytes === 0) throw new UniFiError("invalid_media_size",response.status,outcome);
       if (bytes === 0) return { ok: true as const, status: response.status, data: null };
-      const text = Buffer.concat(chunks, bytes).toString("utf8");
+      const buffer = Buffer.concat(chunks, bytes);
+      if (plan.responseMedia) {
+        const guard = () => { signal.throwIfAborted(); this.options.assertCurrent?.(); };
+        const media = await abortable(storeImage(buffer,mime!,this.options.media ?? hostMediaIO,guard),signal);
+        return {ok:true as const,status:response.status,media};
+      }
+      const text = buffer.toString("utf8");
       let data: unknown;
       try { data = JSON.parse(text); } catch { throw new UniFiError("invalid_json_response", response.status, outcome); }
       this.options.assertCurrent?.();

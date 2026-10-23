@@ -54,6 +54,6 @@ test("local discovery and description work without credentials; status does not 
   assert.equal(r.isError,undefined);assert.equal(configReads,0);
  }
  const r=await createTool("unifi_status",{pluginConfig:{}},{}).execute("local",{});
- assert.equal(r.details.configured,false);assert.equal(r.details.authenticated,"not_checked");assert.equal(r.details.operations,87);
+ assert.equal(r.details.configured,false);assert.equal(r.details.authenticated,"not_checked");assert.equal(r.details.operations,186);
  assert.equal(JSON.stringify(r).includes("X-API-KEY"),false);
 });
