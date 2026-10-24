@@ -4,12 +4,14 @@ import {getToolPluginMetadata} from "openclaw/plugin-sdk/tool-plugin";
 import {toolMetadata} from "../dist/tools.js";
 const meta=getToolPluginMetadata(entry);
 const manifest={
-  id:meta.id,name:meta.name,version:"0.1.0",description:meta.description,categories:["infrastructure"],
+  id:meta.id,name:meta.name,version:"0.2.0",description:meta.description,categories:["infrastructure"],
+  uiCapabilities:["page","navigation"],
   activation:meta.activation,skills:["./skills"],
   configSchema:meta.configSchema,
   configContracts:{secretInputs:{paths:[{path:"apiKey",expected:"string",ownerKind:"capability"}]}},
   uiHints:{
-    apiKey:{label:"UniFi API key reference",sensitive:true,help:"Use Settings → Secrets to save a Protected secret, then select its full store SecretRef. No plaintext keys in configuration. External env/file/exec SecretRefs are supported."},
+    apiKey:{label:"UniFi API key reference",sensitive:true,advanced:true,help:"Open UniFi in the sidebar for automatic token setup. This advanced field accepts external env/file/exec/store SecretRefs only."},
+    setupBinding:{label:"Automatic connection generation",advanced:true,help:"Managed automatically by UniFi setup; do not edit."},
     requestTimeoutMs:{label:"Request timeout (milliseconds)",advanced:true},
     maxResponseBytes:{label:"Maximum JSON response bytes",advanced:true}
   },

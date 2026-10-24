@@ -1,5 +1,6 @@
 import { definePluginEntry, buildJsonPluginConfigSchema } from "openclaw/plugin-sdk/plugin-entry";
 import { toolPluginMetadataSymbol, type ToolPluginMetadata } from "openclaw/plugin-sdk/tool-plugin";
+import { registerSetup } from "./setup.js";
 import { ConfigSchema } from "./config.js";
 import { createTool, toolDefinitions } from "./tools.js";
 
@@ -9,6 +10,7 @@ const entry = definePluginEntry({
   ...identity,
   configSchema: buildJsonPluginConfigSchema(configJson),
   register(api) {
+    registerSetup(api);
     for (const tool of toolDefinitions) api.registerTool(context => createTool(tool.name, api, context), { name: tool.name });
   },
 });

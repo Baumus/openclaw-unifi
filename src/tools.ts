@@ -45,7 +45,7 @@ export function createTool(name: string, api: Pick<OpenClawPluginApi, "pluginCon
           if (Object.keys(args).length) fail("unknown_request_field");
           const config = currentConfig(api, context);
           runtimeLimits(config);
-          return result({ ok: true, plugin: "unifi", version: "0.1.0", configured: credentialAvailable(config), credentialSource: "OpenClaw resolved runtime snapshot", authenticated: "not_checked", catalogDigest, operations: catalog.operations.length, supportedOperations: catalog.operations.filter(op => op.availability.status === "supported").length, byApi: Object.fromEntries(apis.map(api => [api, catalog.operations.filter(op => op.api === api).length])), sources: catalog.sources });
+          return result({ ok: true, plugin: "unifi", version: "0.2.0", configured: credentialAvailable(config), credentialSource: "OpenClaw resolved runtime snapshot", authenticated: "not_checked", catalogDigest, operations: catalog.operations.length, supportedOperations: catalog.operations.filter(op => op.availability.status === "supported").length, byApi: Object.fromEntries(apis.map(api => [api, catalog.operations.filter(op => op.api === api).length])), sources: catalog.sources });
         }
         if (name === "unifi_discover") {
           if (Object.keys(args).some(k => !["search","api","method","cursor","limit"].includes(k))) fail("unknown_request_field");

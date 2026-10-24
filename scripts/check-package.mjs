@@ -17,6 +17,9 @@ try{
   assert.ok(!path.startsWith("node_modules/")&&!path.startsWith("test/")&&!path.startsWith(".git/"),"unintended file "+path);
   assert.ok(!/(^|\/)\.env($|\.)|openclaw\.json$|credentials?\.json$/i.test(path),"unexpected sensitive filename "+path);
  }
+ const manifest=JSON.parse(readFileSync(join(root,"openclaw.plugin.json")));
+ assert.ok(manifest.controlUi?.entry,"native UniFi UI entry required");
+ assert.ok(files.has(manifest.controlUi.entry),"packed browser entry missing");
  const tarball=join(temporary,packed.filename);
  execFileSync("tar",["-xzf",tarball,"-C",temporary]);
  const extracted=join(temporary,"package");
@@ -28,7 +31,7 @@ try{
  execFileSync("npm",["install","--omit=dev","--ignore-scripts","--legacy-peer-deps","--package-lock=false","--no-audit","--no-fund"],{cwd:extracted,stdio:"pipe"});
  const host=import.meta.resolve("openclaw/plugin-sdk/plugin-entry");
  symlinkSync(fileURLToPath(new URL("../../",host)),join(extracted,"node_modules","openclaw"),"dir");
- const probe='const entry=(await import("./dist/index.js")).default;const{catalog}=await import("./dist/catalog.js");const{createTool}=await import("./dist/tools.js");if(entry.id!=="unifi"||catalog.operations.length!==186)throw Error("bad runtime");const r=await createTool("unifi_status",{pluginConfig:{}},{}).execute("packed",{});if(r.details.configured!==false||r.details.operations!==186)throw Error("bad packed tool");const {describe}=await import("./dist/catalog.js"); for(const id of ["protect:get:/v1/cameras/{id}/snapshot","protect:post:/v1/files/{fileType}","innerspace:get:/v1/assets/{planId}/{filename}","mobility:listDevices","carrier-fabric:createSubscriber"]){if(!describe(id).executable)throw Error("missing packed application");} const {validateMediaInput}=await import("./dist/media.js"); validateMediaInput({ref:"inbound:11111111-1111-4111-8111-111111111111.png",mime:"image/png"});console.log("Packed runtime, all API resources and media SDK import succeeded");';
+ const probe='const manifest=JSON.parse((await import("node:fs")).readFileSync("./openclaw.plugin.json","utf8"));const ui=(await import("./"+manifest.controlUi.entry)).default;let pages=0,navigation=0;const dispose=ui.activate({ui:{registerPage(p){if(p.id!=="setup")throw Error("bad page");pages++;return ()=>{};},registerNavigation(n){navigation++;return ()=>{};}}});if(ui.id!=="unifi"||pages!==1||navigation!==1)throw Error("bad packed UI");dispose();const entry=(await import("./dist/index.js")).default;const{catalog}=await import("./dist/catalog.js");const{createTool}=await import("./dist/tools.js");if(entry.id!=="unifi"||catalog.operations.length!==186)throw Error("bad runtime");const r=await createTool("unifi_status",{pluginConfig:{}},{}).execute("packed",{});if(r.details.configured!==false||r.details.operations!==186)throw Error("bad packed tool");const {describe}=await import("./dist/catalog.js"); for(const id of ["protect:get:/v1/cameras/{id}/snapshot","protect:post:/v1/files/{fileType}","innerspace:get:/v1/assets/{planId}/{filename}","mobility:listDevices","carrier-fabric:createSubscriber"]){if(!describe(id).executable)throw Error("missing packed application");} const {validateMediaInput}=await import("./dist/media.js"); validateMediaInput({ref:"inbound:11111111-1111-4111-8111-111111111111.png",mime:"image/png"});console.log("Packed runtime, all API resources and media SDK import succeeded");';
  const output=execFileSync(process.execPath,["--input-type=module","-e",probe],{cwd:extracted,encoding:"utf8"});
  const digest=createHash("sha256").update(readFileSync(tarball)).digest("hex");
  console.log(output.trim());

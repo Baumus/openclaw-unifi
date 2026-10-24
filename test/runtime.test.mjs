@@ -10,7 +10,7 @@ import {getToolPluginMetadata} from "openclaw/plugin-sdk/tool-plugin";
 test("manifest, entry metadata and runtime registrations agree, including honest side effects",()=>{
  const manifest=JSON.parse(readFileSync(new URL("../openclaw.plugin.json",import.meta.url)));
  const registered=[];
- entry.register({pluginConfig:{},registerTool(factory,options){registered.push({factory,options});}});
+ entry.register({pluginConfig:{},registerGatewayMethod(){},registerTool(factory,options){registered.push({factory,options});}});
  const names=registered.map(x=>x.options.name);
  assert.deepEqual(names,manifest.contracts.tools);assert.deepEqual(names,getToolPluginMetadata(entry).tools.map(t=>t.name));
  assert.deepEqual(manifest.toolMetadata,toolMetadata);

@@ -2,7 +2,7 @@
 
 Community OpenClaw plugin providing agent tools for the **official public UniFi APIs**. No MCP server or subprocess is required. Not affiliated with, endorsed by, or an official product of Ubiquiti.
 
-Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.1.0`  
+Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.2.0`
 Tested host: **OpenClaw 2026.10.5 only** (experimental plugin SDK). Node 24.16+ or 26.1+.
 
 ## Coverage
@@ -36,19 +36,29 @@ Official Cloud Connector requirements include console firmware >=5.0.3, console 
 Use the registry route once the version is published:
 
 ```sh
-openclaw plugins install @baumus/openclaw-unifi@0.1.0
+openclaw plugins install @baumus/openclaw-unifi@0.2.0
 # Or the ClawHub package route:
 openclaw plugins install clawhub:@baumus/openclaw-unifi
 ```
 
-For a local source build use `npm pack`, then `openclaw plugins install npm-pack:/absolute/path/to/baumus-openclaw-unifi-0.1.0.tgz`. Installation and activation change your host; they are operator actions, not part of build/tests.
+For a local source build use `npm pack`, then `openclaw plugins install npm-pack:/absolute/path/to/baumus-openclaw-unifi-0.2.0.tgz`. Installation and activation change your host; they are operator actions, not part of build/tests.
 
-## Configure securely in Settings
+## Quick setup — one token field
 
-1. Create a UniFi API key with the rights you actually need in UniFi Site Manager. Use a separate key for this integration when possible.
-2. Open OpenClaw **Settings → Secrets**, add `UNIFI_API_KEY` as a **Protected secret**, and enter the key only in that masked form. The supported agent `secrets` tool can open the same protected prompt; the value does not enter chat.
-3. In plugin Settings, set **UniFi API key reference** (`apiKey`) to the full returned SecretRef. Preserve the returned provider alias; `default` below is an example.
-4. Enable the plugin through OpenClaw and call `unifi_status`. It checks local resolved credential availability, **not** authentication. A subsequent authorized GET verifies access.
+1. Open **UniFi** in the OpenClaw sidebar (or `/plugin?plugin=unifi&id=setup`).
+2. Paste your UniFi API token into the masked field and click **Connect**.
+
+OpenClaw automatically saves a **Protected secret**, binds its reference to UniFi, activates the configuration, and runs a read-only Site Manager connection check. **Connected** means that check succeeded; a saved token alone never counts as a verified connection. No manual SecretRef, secret name, or JSON is needed. Use **Check connection** to retest or paste a replacement token and connect again. German and English labels follow the Control UI language.
+
+Sign in as an OpenClaw administrator for setup. Custom native UI must be enabled once under **Settings → Labs → Custom plugin UI**; other installations may have this host-wide switch off. Open the Control UI on the Gateway's own HTTPS or trusted localhost origin. These requirements are enforced by OpenClaw, not bypassed by this plugin.
+
+A valid UniFi Site Manager API token is required. Create one at [UniFi Site Manager](https://unifi.ui.com/) with the rights you need. The test lists the first page of sites and displays its count, not private site names; it never changes network settings or tests write permissions.
+
+The token goes directly from the browser to OpenClaw's protected-secret RPC, never to an agent tool or plugin-owned credential endpoint. Each token save gets a unique protected-store name so setup cannot overwrite another integration's key. Only its reference is written to config. An interrupted write may leave an unused protected entry; setup never automatically deletes secrets whose use/outcome is uncertain. You can remove old unused entries in Settings → Secrets. Interrupted setup retains only the token-free SecretRef in browser session storage for up to one hour; **Connect** reconciles that same entry after a lost acknowledgement or page remount. Browser policy may disable this optional recovery; then re-enter the token and remove unused entries in Settings → Secrets. A connection is ready only when the saved reference also matches the active runtime source. No background retry loop is used.
+
+### Advanced configuration
+
+External `env`, `file`, `exec`, or existing `store` SecretRefs remain supported under plugin Settings. The automatic setup is optional and does not rewrite external credentials unless you explicitly connect with a replacement token.
 
 Example plugin entry (reference only, never a plaintext key):
 

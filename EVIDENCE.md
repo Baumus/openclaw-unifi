@@ -1,3 +1,18 @@
+# UniFi 0.2.0 one-token onboarding release evidence
+
+- Scope: native UniFi setup page, protected host-owned token storage/binding, read-only connection verification, existing API/tool compatibility.
+- Producer: 342/342 tests passed, including 25 focused onboarding/security/DOM cases. OpenClaw plugin validator valid=true; ClawHub inspector pass with 0 issues/warnings. Production tarball imports backend and built native browser UI, and activates setup page/navigation without source-tree lookup.
+- Independent targeted review by Alfred: USET-01 and USET-02 CLOSED; independent 25/25 onboarding tests passed; git diff --check clean.
+- USET-01: new nonempty token gets fresh protected entry; empty-input resume reconciles saved unique reference; ambiguous write acknowledgement cannot overwrite an existing token. Token-free session recovery expires after one hour.
+- USET-02: config patch writes reference and unique generation marker together; backend checks source match plus marker in same stable resolved runtime object as credential, before and after GET. Matched-new-source/stale-old-runtime test fails closed with zero network calls.
+- Frozen release archive SHA-256: 6773f8ea396e769c638e30dab3720d5ac8eae9b10b51396e2a30f394d3e3e4d5 (65 packaged files).
+- No real UniFi token available. Actual authenticated live connection is untested. Full Control UI browser automation timed out; DOM interaction and packed browser-module activation were tested.
+- Security/storage limits and optional host-wide custom native UI gate are documented in README and SECURITY.
+
+---
+
+## Historical 0.1.0 evidence
+
 # UNI-01 bounded review-fix handoff
 
 Status: **READY FOR TARGETED REVERIFICATION** by requesting owner Alfred; producer evidence is not independent approval. No new reviewer or nested review was started. Parent retains provenance (UNI-02), release and final delivery.

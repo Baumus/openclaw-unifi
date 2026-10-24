@@ -70,3 +70,9 @@ The exact tested host is OpenClaw 2026.10.5. Static metadata uses the exported S
 ## Recovery and verification ownership
 
 Source/catalog regeneration is reversible. Restore the prior reviewed package if necessary; never replay an uncertain mutation as recovery. This implementation does not activate/install itself, write live config, publish, or certify independent readiness. Producer tests cover all catalog routes and failure classes; an independent owner reviews the exact candidate, and the operator separately validates real authentication, installation and UI behavior.
+
+## One-token onboarding (0.2.0)
+
+`src/control-ui.ts` contributes a native UniFi page and navigation. `src/onboarding.ts` submits plaintext only to the host protected-store RPC, then patches the reference with the latest revision and invokes `unifi.connection.check`. Both backend connection RPCs read the current resolved runtime snapshot through the supported SDK. The existing five agent tools and all API catalog operations remain unchanged. Browser assets are built by `openclaw plugins build`, pinned in manifest `controlUi`, and included in the npm tarball.
+
+Readiness is tied to `setupBinding`, a unique nonsecret generation marker patched atomically with the SecretRef. The backend reads marker and resolved key from one runtime config object, checks the expected source reference, and rejects snapshot replacement before/after the GET. Source-only canonicalization cannot make an old runtime key prove a new setup generation.

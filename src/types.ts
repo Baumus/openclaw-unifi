@@ -7,4 +7,4 @@ export type Operation = { operationId: string; api: Api; sourceOperationId?: str
 export type Catalog = { version: number; sources: { api: string; file: string; url: string; sha256: string; retrieved: string }[]; operations: Operation[] };
 export type RequestInput = { operationId: string; consoleId?: string; path?: Record<string, unknown>; query?: Record<string, unknown>; body?: unknown; media?: MediaInput };
 export type RequestPlan = { operationId: string; method: Method; url: URL; body?: string | FormData; upload?: MediaInput; responseMedia?: string[] };
-export type RuntimeConfig = { apiKey?: unknown; requestTimeoutMs?: number; maxResponseBytes?: number };
+export type RuntimeConfig = { apiKey?: unknown; setupBinding?: string; requestTimeoutMs?: number; maxResponseBytes?: number };

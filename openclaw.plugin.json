@@ -1,10 +1,14 @@
 {
   "id": "unifi",
   "name": "UniFi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Community tools for the official public UniFi APIs, including Cloud Connector and governed media.",
   "categories": [
     "infrastructure"
+  ],
+  "uiCapabilities": [
+    "page",
+    "navigation"
   ],
   "activation": {
     "onStartup": true
@@ -54,7 +58,12 @@
           }
         },
         "additionalProperties": false,
-        "description": "OpenClaw SecretRef only. Store the key through Settings → Secrets, then select its reference. Never paste a plaintext key here."
+        "description": "OpenClaw SecretRef only. Use the UniFi page to connect automatically, or configure an advanced SecretRef. Never paste a plaintext key here."
+      },
+      "setupBinding": {
+        "type": "string",
+        "pattern": "^OPENCLAW_UNIFI_[A-F0-9]{32}$",
+        "description": "Automatic setup generation marker; not a credential. Written together with the protected token reference."
       },
       "requestTimeoutMs": {
         "type": "integer",
@@ -88,7 +97,13 @@
     "apiKey": {
       "label": "UniFi API key reference",
       "sensitive": true,
-      "help": "Use Settings → Secrets to save a Protected secret, then select its full store SecretRef. No plaintext keys in configuration. External env/file/exec SecretRefs are supported."
+      "advanced": true,
+      "help": "Open UniFi in the sidebar for automatic token setup. This advanced field accepts external env/file/exec/store SecretRefs only."
+    },
+    "setupBinding": {
+      "label": "Automatic connection generation",
+      "advanced": true,
+      "help": "Managed automatically by UniFi setup; do not edit."
     },
     "requestTimeoutMs": {
       "label": "Request timeout (milliseconds)",
@@ -129,5 +144,8 @@
       "replaySafe": false,
       "sideEffecting": true
     }
+  },
+  "controlUi": {
+    "entry": "dist/control-ui/536ed006fb93bd6fdcf7b3b6137cc8873dc7660465ca9eac5f277ba3f4862a27/index.js"
   }
 }
