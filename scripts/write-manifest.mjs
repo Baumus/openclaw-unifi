@@ -1,10 +1,11 @@
 import {writeFile} from "node:fs/promises";
 import entry from "../dist/index.js";
 import {getToolPluginMetadata} from "openclaw/plugin-sdk/tool-plugin";
-import {toolMetadata} from "../dist/tools.js";
+import {toolMetadata} from "../dist/definitions.js";
+import {PLUGIN_VERSION} from "../dist/version.js";
 const meta=getToolPluginMetadata(entry);
 const manifest={
-  id:meta.id,name:meta.name,version:"0.2.0",description:meta.description,categories:["infrastructure"],
+  id:meta.id,name:meta.name,version:PLUGIN_VERSION,description:meta.description,categories:["infrastructure"],
   uiCapabilities:["page","navigation"],
   activation:meta.activation,skills:["./skills"],
   configSchema:meta.configSchema,

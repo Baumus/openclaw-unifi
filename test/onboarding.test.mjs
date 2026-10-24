@@ -13,13 +13,16 @@ function harness(overrides={}) {
  if(method==='secrets.store.list')return {entries};
  if(method==='secrets.store.set')entries.push({name:params.name,kind:'secret'});
  if(method==='config.patch')savedRef=JSON.parse(params.raw).plugins.entries.unifi.config.apiKey;
- if(method==='unifi.connection.check')return good;
+ if(method==='unifi.connection.check'){
+   const source=overrides['config.get']?await overrides['config.get']({}):{config:{plugins:{entries:{unifi:{config:{setupBinding:savedRef?.id}}}}}};
+   return source.config?.plugins?.entries?.unifi?.config?.setupBinding===params.expectedRef?.id?good:{configured:false,connected:false,code:'configuration_not_active'};
+ }
  return {ok:true};}};
  return {calls,host,controller,flow:new Onboarding(host,controller.signal)};
 }
 test('one-click setup stores only through protected host RPC and binds effective provider with fresh revision',async()=>{
  const h=harness();assert.deepEqual(await h.flow.connect(key,true),good);
- assert.deepEqual(h.calls.map(c=>c.method),['config.get','secrets.store.set','config.get','config.patch','config.get','unifi.connection.check']);
+ assert.deepEqual(h.calls.map(c=>c.method),['config.get','secrets.store.set','config.get','config.patch','unifi.connection.check']);
  const store=h.calls[1].params;assert.equal(store.kind,'secret');assert.equal(store.value,key);assert.match(store.name,/^OPENCLAW_UNIFI_[A-F0-9]{32}$/);
  const patch=h.calls[3].params;assert.equal(patch.baseHash,'rev2');const raw=JSON.parse(patch.raw);
  assert.deepEqual(raw,{plugins:{entries:{unifi:{config:{apiKey:{source:'store',provider:'team-store',id:store.name},setupBinding:store.name}}}}});
@@ -39,11 +42,11 @@ test('invalid config is caught before storing',async()=>{
 });
 test('failure at each host stage is sanitized and never claims success',async()=>{
  for(const [method,stage] of [['secrets.store.set','storage'],['config.patch','activation'],['unifi.connection.check','connection']]){
- const h=harness({[method]:()=>{throw Error('failure '+key);}});await assert.rejects(h.flow.connect(key,true),e=>{assert.ok(e instanceof SetupFailure);assert.equal(e.stage,stage);assert.ok(!String(e).includes(key));return true;});}
+ const h=harness({[method]:()=>{throw Error('failure '+key);}});if(method==='config.patch'){assert.equal((await h.flow.connect(key,true)).code,'configuration_not_active');}else await assert.rejects(h.flow.connect(key,true),e=>{assert.ok(e instanceof SetupFailure);assert.equal(e.stage,stage);assert.ok(!String(e).includes(key));return true;});}
 });
 test('retry after config failure uses saved reference without reentering or rewriting token',async()=>{
  let fail=true,ref;const h=harness({'config.get':()=>({hash:'x',config:{plugins:{entries:{unifi:{config:{apiKey:ref,setupBinding:ref?.id}}}}}}),'config.patch':p=>{if(fail)throw Error('conflict');ref=JSON.parse(p.raw).plugins.entries.unifi.config.apiKey;return {ok:true};}});
- await assert.rejects(h.flow.connect(key,true));assert.equal(h.flow.canRetry,true);fail=false;
+ assert.equal((await h.flow.connect(key,true)).code,'configuration_not_active');assert.equal(h.flow.canRetry,true);fail=false;
  assert.deepEqual(await h.flow.connect('',true),good);assert.equal(h.calls.filter(c=>c.method==='secrets.store.set').length,1);
 });
 test('abort after secret storage prevents config mutation; no automatic deletion of uncertain writes',async()=>{

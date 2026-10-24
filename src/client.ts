@@ -7,9 +7,9 @@
  * runtime credential, no retries/global config, strict redirect and byte bounds,
  * cancellation and sanitized errors. Original files and license: third_party/.
  */
-import { hostMediaIO, storeImage, MAX_MEDIA_BYTES, type MediaIO } from "./media.js";
+import type { MediaIO } from "./media.js";
+import { API_ORIGIN, MAX_MEDIA_BYTES } from "./constants.js";
 import { UniFiError, fail } from "./errors.js";
-import { API_ORIGIN } from "./request.js";
 import type { RequestPlan, RuntimeConfig } from "./types.js";
 
 export type TransportOptions = { fetch?: typeof fetch; assertCurrent?: () => void; media?: MediaIO };
@@ -102,6 +102,7 @@ export class UniFiClient {
       if (bytes === 0) return { ok: true as const, status: response.status, data: null };
       const buffer = Buffer.concat(chunks, bytes);
       if (plan.responseMedia) {
+        const { storeImage, hostMediaIO } = await abortable(import("./media.js"), signal);
         const guard = () => { signal.throwIfAborted(); this.options.assertCurrent?.(); };
         const media = await abortable(storeImage(buffer,mime!,this.options.media ?? hostMediaIO,guard),signal);
         return {ok:true as const,status:response.status,media};

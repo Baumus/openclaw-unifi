@@ -4,6 +4,7 @@ export type ConnectionResult = { configured: boolean; connected: boolean; sites?
 export type SecretRef = { source: 'store'; provider: string; id: string };
 export type PendingStorage = { getItem(key: string): string | null; setItem(key: string, value: string): void; removeItem(key: string): void };
 type Snapshot = { hash?: string; valid?: boolean; config?: { secrets?: { defaults?: { store?: string } }; plugins?: { entries?: { unifi?: { config?: { apiKey?: unknown; setupBinding?: unknown } } } } } };
+export type SetupStage = 'configuration' | 'storage' | 'activation' | 'connection';
 export class SetupFailure extends Error {
   constructor(readonly stage: 'permission' | 'token' | 'configuration' | 'storage' | 'activation' | 'connection') { super(stage); }
 }
@@ -18,7 +19,7 @@ export class Onboarding {
   private pending?: SecretRef;
   private createdAt = 0;
   private busy = false;
-  constructor(private host: RequestHost, private signal: AbortSignal, private storage?: PendingStorage, private storageKey = 'openclaw.unifi.setup.pending') {
+  constructor(private host: RequestHost, private signal: AbortSignal, private storage?: PendingStorage, private storageKey = 'openclaw.unifi.setup.pending', private progress?: (stage: SetupStage) => void) {
     try {
       const saved = JSON.parse(storage?.getItem(storageKey) ?? 'null');
       if (saved && isSetupRef(saved.ref) && Number.isSafeInteger(saved.createdAt) && Date.now() >= saved.createdAt && Date.now() - saved.createdAt < 3_600_000) { this.pending = saved.ref; this.createdAt = saved.createdAt; }
@@ -33,9 +34,9 @@ export class Onboarding {
     return Array.isArray(result.entries) && result.entries.some(e => e.name === ref.id && e.kind === 'secret');
   }
   private async verify(ref: SecretRef): Promise<ConnectionResult> {
-    const source = await this.host.request<Snapshot>('config.get', {});
-    this.current();
-    if (!sameRef(source.config?.plugins?.entries?.unifi?.config?.apiKey, ref) || source.config?.plugins?.entries?.unifi?.config?.setupBinding !== ref.id) throw new SetupFailure('activation');
+    // config.get deliberately redacts SecretRef IDs. Only the backend can
+    // attest the expected source + resolved generation, never a UI readback.
+    this.progress?.('connection');
     const result = await this.host.request<ConnectionResult>('unifi.connection.check', { expectedRef: ref });
     this.current();
     if (result.connected) { this.pending = undefined; this.remember(); }
@@ -58,6 +59,7 @@ export class Onboarding {
     let stage: ConstructorParameters<typeof SetupFailure>[0] = 'configuration';
     try {
       this.current();
+      this.progress?.('configuration');
       const before = await this.host.request<Snapshot>('config.get', {});
       this.current();
       if (!before.hash || before.valid === false) throw new SetupFailure('configuration');
@@ -66,20 +68,29 @@ export class Onboarding {
         if (!/^[a-z][a-z0-9_-]{0,63}$/.test(provider)) throw new SetupFailure('configuration');
         this.pending = { source: 'store', provider, id: 'OPENCLAW_UNIFI_' + crypto.randomUUID().replaceAll('-', '').toUpperCase() };
         this.createdAt = Date.now(); this.remember(); // BEFORE the potentially committed-but-unacknowledged write.
-        stage = 'storage';
+        stage = 'storage'; this.progress?.(stage);
         try { await this.host.request('secrets.store.set', { name: this.pending.id, value: token, kind: 'secret' }); }
         catch { this.current(); if (!await this.stored(this.pending)) throw new SetupFailure('storage'); }
         token = ''; this.current();
       } else {
-        stage = 'storage';
+        stage = 'storage'; this.progress?.(stage);
         if (!await this.stored(this.pending!)) throw new SetupFailure('token');
       }
-      stage = 'activation';
+      stage = 'activation'; this.progress?.(stage);
       const ref = this.pending!;
       const snapshot = await this.host.request<Snapshot>('config.get', {});
       this.current();
       if (!snapshot.hash || snapshot.valid === false) throw new SetupFailure('activation');
-      if (!sameRef(snapshot.config?.plugins?.entries?.unifi?.config?.apiKey, ref) || snapshot.config?.plugins?.entries?.unifi?.config?.setupBinding !== ref.id) {
+      // The visible nonsecret marker is a hint to reconcile, never proof of
+      // readiness. Backend verify still checks the full unredacted source ref.
+      let needsBinding = snapshot.config?.plugins?.entries?.unifi?.config?.setupBinding !== ref.id;
+      if (!needsBinding) {
+        const status = await this.host.request<{ sourceMatches?: boolean }>('unifi.connection.status', { expectedRef: ref });
+        this.current();
+        if (typeof status.sourceMatches !== 'boolean') throw new SetupFailure('activation');
+        needsBinding = !status.sourceMatches;
+      }
+      if (needsBinding) {
         try {
           const ack = await this.host.request<{ ok?: boolean; degradedSecretOwners?: unknown[]; restart?: { scheduled?: boolean } }>('config.patch', { baseHash: snapshot.hash, raw: JSON.stringify({ plugins: { entries: { unifi: { config: { apiKey: ref, setupBinding: ref.id } } } } }), note: 'Connect UniFi using protected token' });
           this.current();

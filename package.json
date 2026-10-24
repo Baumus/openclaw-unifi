@@ -1,6 +1,6 @@
 {
   "name": "@baumus/openclaw-unifi",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Community OpenClaw tools for the official public UniFi APIs, with Cloud Connector forwarding.",
   "type": "module",
   "main": "./dist/index.js",
@@ -20,7 +20,8 @@
     "CONTRIBUTING.md",
     "LICENSE",
     "NOTICE",
-    "third_party"
+    "third_party",
+    "PERFORMANCE.md"
   ],
   "scripts": {
     "catalog:generate": "node scripts/generate-catalog.mjs",
@@ -32,7 +33,9 @@
     "plugin:build:check": "openclaw plugins build --root . --entry ./dist/index.js --check",
     "plugin:validate": "openclaw plugins validate --root . --entry ./dist/index.js --json",
     "package:check": "node scripts/check-package.mjs",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "test:host-reload": "node scripts/check-host-reload.mjs",
+    "benchmark:startup": "node scripts/benchmark-startup.mjs"
   },
   "engines": {
     "node": ">=24.16.0 <25 || >=26.1.0"

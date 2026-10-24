@@ -1,3 +1,15 @@
+# UniFi 0.2.1 performance and setup correction evidence
+
+- Plugin-only changes. No OpenClaw core source, Gateway configuration, permission policy, or real credential is changed by the producer implementation/tests.
+- 356/356 producer regression tests pass; exact catalog remains 186 operations / 184 supported REST operations. New cases cover redacted SecretRef readback, interrupted setup resume/repair, live config retention, prepared capability inputs/revision invalidation, deadline bounds, concurrent probes and lazy tool factories.
+- Installed 2026.10.5 host reload planner tested in an isolated process: token/config paths no longer replace/drain the plugin; enablement, installation/code, other-plugin changes and explicit lifecycle replacements still reload.
+- Official plugin build/check and validate: valid=true, errors=[]. Clean production tarball imports backend and built native browser UI. Runtime dependency audit and final candidate hashes are recorded separately during release.
+- Five-process cold-load baseline versus optimized candidate: entry 885 ms -> 408 ms; setup module 681 ms -> 4 ms (medians). These are import timings, not complete live reload/setup timings; see PERFORMANCE.md.
+- Prior review identified marker-only resume reconciliation as insufficient. Candidate now obtains a backend sourceMatches boolean for the exact full source reference and marker before skipping config.patch; explicit mismatches use ordinary revision-guarded repair. A targeted regression proves this case.
+- Live authentication and applied-version/browser receipts must be verified after deployment. A saved source reference alone does not prove active or working credentials. No token is included in public evidence or test fixtures.
+
+---
+
 # UniFi 0.2.0 one-token onboarding release evidence
 
 - Scope: native UniFi setup page, protected host-owned token storage/binding, read-only connection verification, existing API/tool compatibility.

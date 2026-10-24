@@ -22,7 +22,8 @@ No network happens during registration, discovery, description or catalog genera
 
 | File | Responsibility |
 | --- | --- |
-| `src/index.ts` | Focused SDK definePluginEntry; runtime factories plus the SDK's exported static tool metadata symbol for official build/validate |
+| `src/index.ts` | Lean registration, live-config no-op reload policy, lazy execution factories and static SDK metadata |
+| `src/definitions.ts` | Tool declarations independent of catalog/schema/media implementations |
 | `src/config.ts` | SecretRef-only source schema; latest runtime snapshot selection |
 | `src/catalog.ts` | Pinned catalog/spec loading and integrity; cursor discovery; complete schema closure |
 | `src/schema.ts` | Non-coercing AJV validation, OpenAPI normalization, discriminator/allOf inheritance; JSON bounds |
@@ -76,3 +77,19 @@ Source/catalog regeneration is reversible. Restore the prior reviewed package if
 `src/control-ui.ts` contributes a native UniFi page and navigation. `src/onboarding.ts` submits plaintext only to the host protected-store RPC, then patches the reference with the latest revision and invokes `unifi.connection.check`. Both backend connection RPCs read the current resolved runtime snapshot through the supported SDK. The existing five agent tools and all API catalog operations remain unchanged. Browser assets are built by `openclaw plugins build`, pinned in manifest `controlUi`, and included in the npm tarball.
 
 Readiness is tied to `setupBinding`, a unique nonsecret generation marker patched atomically with the SecretRef. The backend reads marker and resolved key from one runtime config object, checks the expected source reference, and rejects snapshot replacement before/after the GET. Source-only canonicalization cannot make an old runtime key prove a new setup generation.
+
+
+## Fast setup and reload behavior (0.2.1)
+
+The entry registers `noopPrefixes: ["plugins.entries.unifi.config"]` via the public `api.registerReload` contract. All current config fields are read from the committed runtime at invocation time; no service/client captures them at registration. Token rotation and limit changes therefore publish a runtime snapshot without replacing the plugin or draining admitted agent work. This is not a bypass of explicit code reload, installation, enablement or other plugins’ reload policies. Any future config field captured at registration must narrow/revise this policy.
+
+Tool declarations are independent of their implementations. Catalog/schema/media and the source-snapshot SDK load on first actual use rather than during entry registration. Media storage loads only for media handling. SDK imports remain public and version-pinned.
+
+Browser config readback redacts SecretRef IDs. The browser therefore never uses that readback to attest credentials. It sends the known expected reference to the backend, which retains the full source-reference, same-resolved-object and setup-generation checks before and after its GET. The visible generation marker only selects resume reconciliation. A read-only backend status compares the exact hidden source reference and marker before a matching resume skips the patch; mismatches are repaired through the normal revision-guarded patch. Neither marker nor local status proves network readiness. A successful new connection needs five host RPCs rather than six.
+
+The setup GET is fixed to the pinned Site Manager `GET /v1/sites?pageSize=1`. Its network deadline is `min(requestTimeoutMs, 8000)`; agent calls keep their normal configured limit. Concurrent checks share only the pending GET for the exact resolved config object. Results are never cached, token rotations never share checks, and each waiter independently rechecks its expected binding. Setup reports storage, activation and verification stages, plus explicit timeout/rate-limit errors.
+
+Regression proof: `npm test`, `npm run test:host-reload` (read-only host fixtures in an isolated process), `npm run benchmark:startup`. No OpenClaw core edits are required. Full plugin-code reload remains subject to host-owned admitted-work settlement; this plugin does not hold artificial leases or terminate work.
+
+
+Capability-owned credentials may remain authored SecretRefs in a call's config view. `src/credential.ts` uses only `getPreparedPluginSecretInput` from the public secret-input SDK in that active invocation, never a resolver or direct store read. A prepared input is used only when a credential reference is present; removed config never falls back. Its host revision/value is rechecked by the invocation guard, and concurrent setup checks do not share across prepared revisions. Resolved runtime strings retain the existing path. The setup generation and full source-reference gates remain mandatory; a prepared input cannot override an old generation marker.

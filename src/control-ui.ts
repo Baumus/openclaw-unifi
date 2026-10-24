@@ -8,7 +8,6 @@ export const mountSetup: ControlUiView = (container, context) => {
   const signal = AbortSignal.any([context.signal, lifetime.signal]);
   let recovery: PendingStorage | undefined;
   try { recovery = window.sessionStorage; } catch {}
-  const flow = new Onboarding(context.host, signal, recovery, 'openclaw.unifi.setup.pending:' + context.host.basePath);
   const root = document.createElement('section');
   root.style.cssText = 'max-width:640px;margin:32px auto;padding:28px;border:1px solid var(--border, #8885);border-radius:16px;background:var(--card, transparent);color:var(--text, inherit);font:inherit;box-sizing:border-box';
   const title = document.createElement('h1'); title.textContent = 'UniFi'; title.style.marginTop = '0';
@@ -22,6 +21,16 @@ export const mountSetup: ControlUiView = (container, context) => {
   const connect = document.createElement('button'); connect.type = 'submit'; connect.textContent = say('Verbinden', 'Connect'); connect.className = 'btn primary';
   const check = document.createElement('button'); check.type = 'button'; check.textContent = say('Verbindung prüfen', 'Check connection'); check.className = 'btn'; check.style.marginInlineStart = '10px';
   const status = document.createElement('p'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+  const flow = new Onboarding(context.host, signal, recovery, 'openclaw.unifi.setup.pending:' + context.host.basePath, stage => {
+    if (signal.aborted) return;
+    const messages = {
+      configuration: say('Einrichtung wird vorbereitet …', 'Preparing setup …'),
+      storage: say('Token wird geschützt gespeichert …', 'Saving token securely …'),
+      activation: say('Token wird aktiviert …', 'Activating token …'),
+      connection: say('UniFi-Verbindung wird geprüft (max. 8 Sekunden Netzwerkwartezeit) …', 'Checking UniFi connection (up to 8 seconds network wait) …'),
+    };
+    status.textContent = messages[stage];
+  });
   const help = document.createElement('p'); help.style.cssText = 'font-size:.9em;opacity:.8;line-height:1.5';
   help.textContent = say('Geschützte Speicherung und Einrichtung erfolgen automatisch. Der Verbindungstest liest nur Daten und ändert dein Netzwerk nicht.', 'Protected storage and configuration are automatic. The connection test only reads data and does not change your network.');
   const keyLink = document.createElement('a'); keyLink.href = 'https://unifi.ui.com/'; keyLink.target = '_blank'; keyLink.rel = 'noopener noreferrer'; keyLink.textContent = say('API-Token in UniFi Site Manager erstellen', 'Create an API token in UniFi Site Manager');
@@ -31,8 +40,10 @@ export const mountSetup: ControlUiView = (container, context) => {
   let disposed = false;
   const updatePermissions = () => { if (!context.host.connection.canAdmin || !context.host.connection.connected) input.value = ''; input.disabled = busy || !context.host.connection.canAdmin || !context.host.connection.connected; connect.disabled = input.disabled; check.disabled = busy || !context.host.connection.canRead || !context.host.connection.connected; };
   const show = (r: ConnectionResult) => {
-    if (r.connected) status.textContent = say(`Verbunden — ${r.sites ?? 0} Standort(e) auf dieser Ergebnisseite. Das Plugin ist einsatzbereit.`, `Connected — ${r.sites ?? 0} site(s) on this result page. The plugin is ready.`);
+    if (r.connected) status.textContent = say('Verbunden. Der UniFi-Zugriff ist bestätigt; das Plugin ist einsatzbereit.', 'Connected. UniFi access is verified; the plugin is ready.');
     else if (r.code === 'configuration_not_active') status.textContent = say('Token gespeichert, Aktivierung steht noch aus. Bitte Verbindung erneut prüfen, sobald OpenClaw die Aktivierung abgeschlossen hat.', 'Token saved, activation is still pending. Check the connection again once OpenClaw has finished activation.');
+    else if (r.code === 'timeout') status.textContent = say('UniFi antwortet nicht rechtzeitig. Der Token bleibt gespeichert; bitte Verbindung erneut prüfen.', 'UniFi did not respond in time. Your token remains saved; check the connection again.');
+    else if (r.status === 429) status.textContent = say('UniFi begrenzt gerade die Anfragen. Bitte später erneut prüfen; der Token bleibt gespeichert.', 'UniFi is rate-limiting requests. Check again later; your token remains saved.');
     else if (r.status === 401 || r.status === 403) status.textContent = say('Token gespeichert, aber UniFi verweigert den Zugriff. Bitte Token und seine Berechtigungen prüfen.', 'Token saved, but UniFi denied access. Check the token and its permissions.');
     else if (!r.configured) status.textContent = say('Noch nicht verbunden. Füge deinen UniFi API-Token ein.', 'Not connected yet. Paste your UniFi API token.');
     else status.textContent = say('Token eingerichtet. Die Verbindung konnte noch nicht bestätigt werden. Bitte Verbindung prüfen oder Token ersetzen.', 'Token configured. Connection could not be confirmed. Check the connection or replace the token.');

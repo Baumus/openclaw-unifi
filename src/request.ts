@@ -4,7 +4,8 @@ import { fail } from "./errors.js";
 import { validatePlainJson, validateValue } from "./schema.js";
 import type { Parameter, RequestInput, RequestPlan } from "./types.js";
 
-export const API_ORIGIN = "https://api.ui.com";
+import { API_ORIGIN } from "./constants.js";
+export { API_ORIGIN } from "./constants.js";
 /** Percent is forbidden: no double-encoding, encoded traversal or encoded separators. */
 export function safeSegment(value: unknown): string {
   if ((typeof value !== "string" && typeof value !== "number") || (typeof value === "number" && !Number.isSafeInteger(value))) fail("invalid_path");

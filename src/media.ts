@@ -3,7 +3,8 @@ import { detectMime } from "openclaw/plugin-sdk/media-mime";
 import { fail, UniFiError } from "./errors.js";
 import type { MediaInput } from "./types.js";
 
-export const MAX_MEDIA_BYTES = 5 * 1024 * 1024;
+import { MAX_MEDIA_BYTES } from "./constants.js";
+export { MAX_MEDIA_BYTES } from "./constants.js";
 export const uploadMimes = ["image/gif","image/jpeg","image/png","audio/mpeg","audio/mp4","audio/wave","audio/x-caf"] as const;
 const extensions: Record<string,string> = { "image/gif":"gif","image/jpeg":"jpg","image/png":"png","audio/mpeg":"mp3","audio/mp4":"m4a","audio/wave":"wav","audio/x-caf":"caf" };
 export type MediaIO = {
