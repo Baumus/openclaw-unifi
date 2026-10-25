@@ -20,6 +20,17 @@ try{
  const manifest=JSON.parse(readFileSync(join(root,"openclaw.plugin.json")));
  assert.ok(manifest.controlUi?.entry,"native UniFi UI entry required");
  assert.ok(files.has(manifest.controlUi.entry),"packed browser entry missing");
+ // Only modules produced from current source and the active native UI belong
+ // in dist. In particular, old hashed UI generations are not release resources.
+ const expectedDist=new Set(readdirSync(join(root,"src")).filter(p=>p.endsWith(".ts")).flatMap(p=>{
+  const stem=p.slice(0,-3);return ["dist/"+stem+".js","dist/"+stem+".js.map","dist/"+stem+".d.ts"];
+ }));
+ const uiRoot=manifest.controlUi.entry.slice(0,manifest.controlUi.entry.lastIndexOf("/")+1);
+ assert.match(uiRoot,/^dist\/control-ui\/[a-f0-9]{64}\/$/,"unexpected UI build root");
+ for(const path of files)if(path.startsWith("dist/")){
+  assert.ok(expectedDist.has(path)||path.startsWith(uiRoot),"stale or unexpected packed build output "+path);
+ }
+ for(const path of expectedDist)assert.ok(files.has(path),"missing current runtime output "+path);
  const tarball=join(temporary,packed.filename);
  execFileSync("tar",["-xzf",tarball,"-C",temporary]);
  const extracted=join(temporary,"package");
