@@ -1,7 +1,7 @@
 {
   "id": "unifi",
   "name": "UniFi",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Community tools for the official public UniFi APIs, including Cloud Connector and governed media.",
   "categories": [
     "infrastructure"
@@ -116,6 +116,10 @@
   },
   "controlUi": {
     "entry": "dist/control-ui/f34d0727088987c34f0a5b37810ac7040884ac27deecba1610ac6a5e5e8de98c/index.js"
+  },
+  "doctorContract": {
+    "configRepair": true,
+    "stateMigrations": []
   },
   "contracts": {
     "tools": [

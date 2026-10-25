@@ -2,8 +2,10 @@
 
 Community OpenClaw plugin providing agent tools for the **official public UniFi APIs**. No MCP server or subprocess is required. Not affiliated with, endorsed by, or an official product of Ubiquiti.
 
-Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.2.0`
-Tested host: **OpenClaw 2026.10.5 only** (experimental plugin SDK). Node 24.16+ or 26.1+.
+Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.2.2`
+Release **0.2.2** restores compatibility with OpenClaw 2026.10.7 and supports inspection of retained configuration during upgrades.
+
+Tested host: **OpenClaw 2026.10.7 only** (experimental plugin SDK). Node 24.16+ or 26.1+.
 
 ## Coverage
 
@@ -36,12 +38,12 @@ Official Cloud Connector requirements include console firmware >=5.0.3, console 
 Use the registry route once the version is published:
 
 ```sh
-openclaw plugins install @baumus/openclaw-unifi@0.2.0
+openclaw plugins install clawhub:@baumus/openclaw-unifi@0.2.2
 # Or the ClawHub package route:
 openclaw plugins install clawhub:@baumus/openclaw-unifi
 ```
 
-For a local source build use `npm pack`, then `openclaw plugins install npm-pack:/absolute/path/to/baumus-openclaw-unifi-0.2.0.tgz`. Installation and activation change your host; they are operator actions, not part of build/tests.
+For a local source build use `npm pack`, then `openclaw plugins install npm-pack:/absolute/path/to/baumus-openclaw-unifi-0.2.2.tgz`. Installation and activation change your host; they are operator actions, not part of build/tests.
 
 ## Quick setup — one token field
 
@@ -164,7 +166,7 @@ Errors are structured codes/status only; no upstream response body, credentials,
 npm ci --ignore-scripts --legacy-peer-deps
 # Provide the exact tested host SDK, e.g. link your installed OpenClaw into node_modules/openclaw,
 # or install the matching host package without changing the project lock:
-npm install --no-save --package-lock=false --ignore-scripts --legacy-peer-deps openclaw@2026.10.5
+npm install --no-save --package-lock=false --ignore-scripts --legacy-peer-deps openclaw@2026.10.7
 npm run typecheck
 npm test
 npm run plugin:build

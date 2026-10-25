@@ -95,7 +95,7 @@ test('lazy registered factories preserve live runtime reads and release version 
  let current={};const tool=factories.get('unifi_status')({getRuntimeConfig:()=>current});
  assert.equal((await tool.execute('before',{})).details.configured,false);
  current=active();const status=(await tool.execute('after',{})).details;
- assert.equal(status.configured,true);assert.equal(status.version,'0.2.1');
+ assert.equal(status.configured,true);assert.equal(status.version,'0.2.2');
 });
 test('resume repairs mismatched hidden source ref despite matching visible marker',async()=>{
  const saved=JSON.stringify({ref,createdAt:Date.now()});let patches=0,checks=0;
@@ -115,7 +115,7 @@ test('local source-binding status checks exact reference and marker without a GE
   registerSetup({registerGatewayMethod:(n,h)=>handlers.set(n,h),runtime:{config:{current:()=>cfg}}},source);
   for(const match of [true,false]){
    let reply;await handlers.get('unifi.connection.status')({params:{expectedRef:match?ref:{...ref,provider:'other'}},respond:(_ok,data)=>reply=data});
-   assert.equal(reply.sourceMatches,match);assert.equal(reply.connected,false);assert.equal(reply.version,'0.2.1');
+   assert.equal(reply.sourceMatches,match);assert.equal(reply.connected,false);assert.equal(reply.version,'0.2.2');
   }
   assert.equal(sent,0);
  }finally{globalThis.fetch=original;}

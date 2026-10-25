@@ -11,7 +11,7 @@ try{
  const packed=JSON.parse(execFileSync("npm",["pack","--ignore-scripts","--json","--pack-destination",temporary],{cwd:root,encoding:"utf8"}))[0];
  const files=new Set(packed.files.map(f=>f.path));
  const runtime=readdirSync(join(root,"dist")).filter(p=>p.endsWith(".js"));
- const required=["package.json","openclaw.plugin.json","README.md","API_INVENTORY.md","ARCHITECTURE.md","SECURITY.md","CONTRIBUTING.md","LICENSE","NOTICE","assets/icon.png","assets/icon.svg","assets/activity.svg","skills/unifi/SKILL.md","specs/catalog.json","specs/provenance.json","specs/site-manager-v1.0.0.json","specs/network-v10.6.106.json","specs/protect-v7.3.70.json","specs/innerspace-v1.3.23.json","specs/mobility-v1.0.0.json","specs/carrier-fabric-v1.0.0.json","specs/availability.json","third_party/unifi-mcp-server/LICENSE","third_party/unifi-mcp-server/client.ts","third_party/unifi-mcp-server/connector-client.ts",...runtime.map(p=>"dist/"+p)];
+ const required=["package.json","dist/doctor-contract-api.js","openclaw.plugin.json","README.md","API_INVENTORY.md","ARCHITECTURE.md","SECURITY.md","CONTRIBUTING.md","LICENSE","NOTICE","assets/icon.png","assets/icon.svg","assets/activity.svg","skills/unifi/SKILL.md","specs/catalog.json","specs/provenance.json","specs/site-manager-v1.0.0.json","specs/network-v10.6.106.json","specs/protect-v7.3.70.json","specs/innerspace-v1.3.23.json","specs/mobility-v1.0.0.json","specs/carrier-fabric-v1.0.0.json","specs/availability.json","third_party/unifi-mcp-server/LICENSE","third_party/unifi-mcp-server/client.ts","third_party/unifi-mcp-server/connector-client.ts",...runtime.map(p=>"dist/"+p)];
  for(const path of required)assert.ok(files.has(path),"packed artifact missing "+path);
  for(const path of files){
   assert.ok(!path.startsWith("node_modules/")&&!path.startsWith("test/")&&!path.startsWith(".git/"),"unintended file "+path);
@@ -24,7 +24,7 @@ try{
  execFileSync("tar",["-xzf",tarball,"-C",temporary]);
  const extracted=join(temporary,"package");
  const pkg=JSON.parse(readFileSync(join(extracted,"package.json")));
- assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,"2026.10.5");
+ assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,"2026.10.7");
  assert.deepEqual(Object.keys(pkg.dependencies).sort(),["ajv","ajv-formats","typebox"]);
  assert.equal(readFileSync(join(extracted,"assets/icon.png")).subarray(0,8).toString("hex"),"89504e470d0a1a0a");
  // A clean production dependency project: no source-tree node_modules lookup.

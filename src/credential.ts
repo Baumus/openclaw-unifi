@@ -9,13 +9,14 @@ export type PreparedReader = (pluginId: string, path: string) => PreparedInput;
 export async function captureCredential(config: RuntimeConfig, reader?: PreparedReader) {
   const ref = config.apiKey;
   if (credentialAvailable(config) || !ref || typeof ref !== 'object') {
-    return { config, revision: undefined, isCurrent: () => true };
+    return { config, revision: undefined, state: credentialAvailable(config) ? 'ready' : typeof ref === 'string' ? 'invalid_format' : 'not_configured', isCurrent: () => true };
   }
   const read = reader ?? (await import('openclaw/plugin-sdk/secret-input-runtime')).getPreparedPluginSecretInput;
   const prepared = read('unifi', 'apiKey');
   return {
     config: { ...config, apiKey: prepared.value },
     revision: prepared.revision,
+    state: credentialAvailable({apiKey: prepared.value}) ? 'ready' : prepared.value ? 'invalid_format' : 'not_prepared',
     isCurrent: () => {
       const current = read('unifi', 'apiKey');
       return current.revision === prepared.revision && current.value === prepared.value;

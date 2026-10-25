@@ -15,7 +15,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --legacy-peer-deps
       - name: Install exact tested host SDK
-        run: npm install --no-save --package-lock=false --ignore-scripts --legacy-peer-deps openclaw@2026.10.5
+        run: npm install --no-save --package-lock=false --ignore-scripts --legacy-peer-deps openclaw@2026.10.7
       - run: npm run typecheck
       - run: npm test
       - run: npm run plugin:build:check

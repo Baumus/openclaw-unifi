@@ -66,7 +66,7 @@ Request JSON is bounded to 1 MiB, 48 nesting levels and 100,000 visited nodes. U
 
 The manifest declares `apiKey` as `configContracts.secretInputs.paths` with `ownerKind: capability`. The host validates the reference in source config, resolves to an in-memory runtime string, and fails that capability cold on resolution failure. Tool calls use `getRuntimeConfig` first, then a supplied runtime snapshot, then registration's resolved `api.pluginConfig` only where no snapshot API exists. A present but unavailable/removed current snapshot never falls back.
 
-The exact tested host is OpenClaw 2026.10.5. Static metadata uses the exported SDK contract; metadata generation/validation and runtime-registration consistency are tested. Future host versions need a new compatibility validation, not a broader speculative version range.
+The exact tested host is OpenClaw 2026.10.7. Static metadata uses the exported SDK contract; metadata generation/validation and runtime-registration consistency are tested. Future host versions need a new compatibility validation, not a broader speculative version range.
 
 ## Recovery and verification ownership
 
@@ -93,3 +93,7 @@ Regression proof: `npm test`, `npm run test:host-reload` (read-only host fixture
 
 
 Capability-owned credentials may remain authored SecretRefs in a call's config view. `src/credential.ts` uses only `getPreparedPluginSecretInput` from the public secret-input SDK in that active invocation, never a resolver or direct store read. A prepared input is used only when a credential reference is present; removed config never falls back. Its host revision/value is rechecked by the invocation guard, and concurrent setup checks do not share across prepared revisions. Resolved runtime strings retain the existing path. The setup generation and full source-reference gates remain mandatory; a prepared input cannot override an old generation marker.
+
+## Upgrade inspection
+
+The stateless `dist/doctor-contract-api.js` validates retained UniFi configuration against the existing SecretRef-only schema. It resolves no secrets, performs no IO and reports no config changes. Its explicit config-repair and empty state-migration declarations let the host inspect deferred upgrade obligations before replacing the package. Invalid retained settings produce a constant, token-free warning and remain unchanged.

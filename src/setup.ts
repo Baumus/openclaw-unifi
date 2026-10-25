@@ -49,6 +49,8 @@ export function registerSetup(api: OpenClawPluginApi, sourceReader?: typeof getR
         if (!network) {
           const source = expected ? readSource?.()?.plugins?.entries?.unifi?.config : undefined;
           respond(true, { version: PLUGIN_VERSION, configured: credentialAvailable(credential.config), connected: false,
+            credentialState: credential.state, credentialRevision: credential.revision,
+            runtimeCredentialType: typeof config.apiKey, registrationCredentialType: typeof api.pluginConfig?.apiKey,
             ...(expected ? { sourceMatches: sameRef(source?.apiKey, expected) && source?.setupBinding === expected.id } : {}),
           }); return;
         }
