@@ -1,7 +1,7 @@
 {
   "id": "unifi",
   "name": "UniFi",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Community tools for the official public UniFi APIs, including Cloud Connector and governed media.",
   "categories": [
     "infrastructure"

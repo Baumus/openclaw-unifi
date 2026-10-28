@@ -35,7 +35,7 @@ try{
  execFileSync("tar",["-xzf",tarball,"-C",temporary]);
  const extracted=join(temporary,"package");
  const pkg=JSON.parse(readFileSync(join(extracted,"package.json")));
- assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,"2026.10.7");
+ assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,">=2026.10.7 <2026.11.0");
  assert.deepEqual(Object.keys(pkg.dependencies).sort(),["ajv","ajv-formats","typebox"]);
  assert.equal(readFileSync(join(extracted,"assets/icon.png")).subarray(0,8).toString("hex"),"89504e470d0a1a0a");
  // A clean production dependency project: no source-tree node_modules lookup.

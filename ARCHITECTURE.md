@@ -66,7 +66,7 @@ Request JSON is bounded to 1 MiB, 48 nesting levels and 100,000 visited nodes. U
 
 The manifest declares `apiKey` as `configContracts.secretInputs.paths` with `ownerKind: capability`. The host validates the reference in source config, resolves to an in-memory runtime string, and fails that capability cold on resolution failure. Tool calls use `getRuntimeConfig` first, then a supplied runtime snapshot, then registration's resolved `api.pluginConfig` only where no snapshot API exists. A present but unavailable/removed current snapshot never falls back.
 
-The exact tested host is OpenClaw 2026.10.7. Static metadata uses the exported SDK contract; metadata generation/validation and runtime-registration consistency are tested. Future host versions need a new compatibility validation, not a broader speculative version range.
+Tested hosts are OpenClaw 2026.10.7 and 2026.10.8. Static metadata uses the exported SDK contract; metadata generation/validation and runtime-registration consistency are tested. The declared range ends before 2026.11.0; later hosts need a new compatibility validation.
 
 ## Recovery and verification ownership
 
