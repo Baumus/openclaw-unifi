@@ -7,6 +7,10 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        openclaw: ["2026.10.7", "2026.10.8"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,7 +19,9 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --legacy-peer-deps
       - name: Install exact tested host SDK
-        run: npm install --no-save --package-lock=false --ignore-scripts --legacy-peer-deps openclaw@2026.10.7
+        run: |
+          npm install --no-save --ignore-scripts "openclaw@${{ matrix.openclaw }}"
+          node -e 'const assert=require("node:assert/strict"); assert.equal(require("./node_modules/openclaw/package.json").version, process.argv[1])' "${{ matrix.openclaw }}"
       - run: npm run typecheck
       - run: npm test
       - run: npm run plugin:build:check
