@@ -5,7 +5,7 @@ Community OpenClaw plugin providing agent tools for the **official public UniFi 
 Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.2.4`
 Release **0.2.4** retains the clean package build from 0.2.3 and accepts the tested OpenClaw 2026.10.8 host.
 
-Tested hosts: **OpenClaw 2026.10.7 and 2026.10.8** (experimental plugin SDK). The declared compatibility range stops before 2026.11.0. Node 24.16+ or 26.1+.
+Tested hosts: **OpenClaw 2026.10.7 and 2026.10.8** (experimental plugin SDK). The declared compatibility range stops before 2026.11.0. Node 24.22.1+ or 26.12.1+ is required by these hosts.
 
 ## Coverage
 
