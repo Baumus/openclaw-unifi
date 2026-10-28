@@ -1,6 +1,6 @@
 {
   "name": "@baumus/openclaw-unifi",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "Community OpenClaw tools for the official public UniFi APIs, with Cloud Connector forwarding.",
   "type": "module",
   "main": "./dist/index.js",
@@ -27,9 +27,9 @@
     "catalog:generate": "node scripts/generate-catalog.mjs",
     "catalog:check": "node scripts/generate-catalog.mjs --check",
     "typecheck": "tsc --noEmit",
-    "build": "npm run catalog:check && tsc",
+    "build": "node scripts/build.mjs",
     "test": "npm run build && node --test test/*.test.mjs",
-    "plugin:build": "npm run build && openclaw plugins build --root . --entry ./dist/index.js",
+    "plugin:build": "npm run build",
     "plugin:build:check": "openclaw plugins build --root . --entry ./dist/index.js --check",
     "plugin:validate": "openclaw plugins validate --root . --entry ./dist/index.js --json",
     "package:check": "node scripts/check-package.mjs",
@@ -38,10 +38,10 @@
     "benchmark:startup": "node scripts/benchmark-startup.mjs"
   },
   "engines": {
-    "node": ">=24.16.0 <25 || >=26.1.0"
+    "node": ">=24.22.1 <25 || >=26.12.1"
   },
   "peerDependencies": {
-    "openclaw": "2026.10.7"
+    "openclaw": ">=2026.10.7 <2026.11.0"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -75,8 +75,8 @@
       "./dist/index.js"
     ],
     "compat": {
-      "pluginApi": "2026.10.7",
-      "minGatewayVersion": "2026.10.7"
+      "pluginApi": ">=2026.10.7 <2026.11.0",
+      "minGatewayVersion": ">=2026.10.7 <2026.11.0"
     },
     "build": {
       "openclawVersion": "2026.10.7",

@@ -22,3 +22,7 @@ No publishing, release tagging, activation, config changes or credentialed write
 ## Security and tests
 
 Do not submit keys, raw host config, network/customer data or private logs. Use synthetic fixture names and mock fetch. Test invalid writes before credentials/network, exact canonical route/serialization, subtype fields, cancellation/byte bounds, structured errors and no retries. Treat API response content as untrusted. See SECURITY.md for private reports.
+
+## Complete release builds
+
+`npm run build` removes `dist`, checks the pinned catalog, compiles current runtime modules, and builds native Control UI assets and metadata using the official host CLI. `npm pack` runs that complete build through `prepack`. Do not use `npm pack --ignore-scripts` on an unbuilt tree. `npm run package:check` rejects removed runtime modules and inactive hashed UI generations in the tarball. This package hygiene does not substitute for a completed ClawHub security scan.

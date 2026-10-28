@@ -2,10 +2,10 @@
 
 Community OpenClaw plugin providing agent tools for the **official public UniFi APIs**. No MCP server or subprocess is required. Not affiliated with, endorsed by, or an official product of Ubiquiti.
 
-Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.2.2`
-Release **0.2.2** restores compatibility with OpenClaw 2026.10.7 and supports inspection of retained configuration during upgrades.
+Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.2.4`
+Release **0.2.4** retains the clean package build from 0.2.3 and accepts the tested OpenClaw 2026.10.8 host.
 
-Tested host: **OpenClaw 2026.10.7 only** (experimental plugin SDK). Node 24.16+ or 26.1+.
+Tested hosts: **OpenClaw 2026.10.7 and 2026.10.8** (experimental plugin SDK). The declared compatibility range stops before 2026.11.0. Node 24.22.1+ or 26.12.1+ is required by these hosts.
 
 ## Coverage
 
@@ -38,12 +38,12 @@ Official Cloud Connector requirements include console firmware >=5.0.3, console 
 Use the registry route once the version is published:
 
 ```sh
-openclaw plugins install clawhub:@baumus/openclaw-unifi@0.2.2
+openclaw plugins install clawhub:@baumus/openclaw-unifi@0.2.4
 # Or the ClawHub package route:
 openclaw plugins install clawhub:@baumus/openclaw-unifi
 ```
 
-For a local source build use `npm pack`, then `openclaw plugins install npm-pack:/absolute/path/to/baumus-openclaw-unifi-0.2.2.tgz`. Installation and activation change your host; they are operator actions, not part of build/tests.
+For a local source build use `npm pack`, then `openclaw plugins install npm-pack:/absolute/path/to/baumus-openclaw-unifi-0.2.4.tgz`. Installation and activation change your host; they are operator actions, not part of build/tests.
 
 ## Quick setup — one token field
 

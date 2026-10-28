@@ -8,8 +8,12 @@ import {createHash} from "node:crypto";
 const root=fileURLToPath(new URL("../",import.meta.url));
 const temporary=mkdtempSync(join(tmpdir(),"openclaw-unifi-pack-"));
 try{
- const packed=JSON.parse(execFileSync("npm",["pack","--ignore-scripts","--json","--pack-destination",temporary],{cwd:root,encoding:"utf8"}))[0];
- const files=new Set(packed.files.map(f=>f.path));
+ const filename=execFileSync("npm",["pack","--ignore-scripts","--silent","--pack-destination",temporary],{cwd:root,encoding:"utf8"}).trim();
+ assert.match(filename,/^baumus-openclaw-unifi-[0-9A-Za-z.-]+\.tgz$/,"unexpected packed archive name");
+ const tarball=join(temporary,filename);
+ const members=execFileSync("tar",["-tzf",tarball],{encoding:"utf8"}).trim().split(/\r?\n/);
+ for(const member of members)assert.ok(member.startsWith("package/")&&!member.includes("../"),"unsafe archive member "+member);
+ const files=new Set(members.map(member=>member.slice("package/".length)));
  const runtime=readdirSync(join(root,"dist")).filter(p=>p.endsWith(".js"));
  const required=["package.json","dist/doctor-contract-api.js","openclaw.plugin.json","README.md","API_INVENTORY.md","ARCHITECTURE.md","SECURITY.md","CONTRIBUTING.md","LICENSE","NOTICE","assets/icon.png","assets/icon.svg","assets/activity.svg","skills/unifi/SKILL.md","specs/catalog.json","specs/provenance.json","specs/site-manager-v1.0.0.json","specs/network-v10.6.106.json","specs/protect-v7.3.70.json","specs/innerspace-v1.3.23.json","specs/mobility-v1.0.0.json","specs/carrier-fabric-v1.0.0.json","specs/availability.json","third_party/unifi-mcp-server/LICENSE","third_party/unifi-mcp-server/client.ts","third_party/unifi-mcp-server/connector-client.ts",...runtime.map(p=>"dist/"+p)];
  for(const path of required)assert.ok(files.has(path),"packed artifact missing "+path);
@@ -20,11 +24,21 @@ try{
  const manifest=JSON.parse(readFileSync(join(root,"openclaw.plugin.json")));
  assert.ok(manifest.controlUi?.entry,"native UniFi UI entry required");
  assert.ok(files.has(manifest.controlUi.entry),"packed browser entry missing");
- const tarball=join(temporary,packed.filename);
+ // Only modules produced from current source and the active native UI belong
+ // in dist. In particular, old hashed UI generations are not release resources.
+ const expectedDist=new Set(readdirSync(join(root,"src")).filter(p=>p.endsWith(".ts")).flatMap(p=>{
+  const stem=p.slice(0,-3);return ["dist/"+stem+".js","dist/"+stem+".js.map","dist/"+stem+".d.ts"];
+ }));
+ const uiRoot=manifest.controlUi.entry.slice(0,manifest.controlUi.entry.lastIndexOf("/")+1);
+ assert.match(uiRoot,/^dist\/control-ui\/[a-f0-9]{64}\/$/,"unexpected UI build root");
+ for(const path of files)if(path.startsWith("dist/")){
+  assert.ok(expectedDist.has(path)||path.startsWith(uiRoot),"stale or unexpected packed build output "+path);
+ }
+ for(const path of expectedDist)assert.ok(files.has(path),"missing current runtime output "+path);
  execFileSync("tar",["-xzf",tarball,"-C",temporary]);
  const extracted=join(temporary,"package");
  const pkg=JSON.parse(readFileSync(join(extracted,"package.json")));
- assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,"2026.10.7");
+ assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,">=2026.10.7 <2026.11.0");
  assert.deepEqual(Object.keys(pkg.dependencies).sort(),["ajv","ajv-formats","typebox"]);
  assert.equal(readFileSync(join(extracted,"assets/icon.png")).subarray(0,8).toString("hex"),"89504e470d0a1a0a");
  // A clean production dependency project: no source-tree node_modules lookup.
