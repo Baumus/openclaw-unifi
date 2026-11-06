@@ -3,9 +3,9 @@
 Community OpenClaw plugin providing agent tools for the **official public UniFi APIs**. No MCP server or subprocess is required. Not affiliated with, endorsed by, or an official product of Ubiquiti.
 
 Package: `@baumus/openclaw-unifi` · plugin ID: `unifi` · version: `0.2.4`
-Release **0.2.4** retains the clean package build from 0.2.3 and accepts the tested OpenClaw 2026.10.8 host.
+Release **0.2.4** retains the clean package build from 0.2.3. This source revision updates compatibility to OpenClaw 2026.11.1; it does not publish a new package release.
 
-Tested hosts: **OpenClaw 2026.10.7 and 2026.10.8** (experimental plugin SDK). The declared compatibility range stops before 2026.11.0. Node 24.22.1+ or 26.12.1+ is required by these hosts.
+Target host: **OpenClaw 2026.11.1 only** (experimental plugin SDK). Earlier plugin releases retain their existing host declarations; this source revision does not claim compatibility with untested hosts. Node 24.22.1+ or 26.12.1+ is required.
 
 ## Coverage
 
@@ -166,7 +166,7 @@ Errors are structured codes/status only; no upstream response body, credentials,
 npm ci --ignore-scripts --legacy-peer-deps
 # Provide the exact tested host SDK, e.g. link your installed OpenClaw into node_modules/openclaw,
 # or install the matching host package without changing the project lock:
-npm install --no-save --package-lock=false --ignore-scripts --legacy-peer-deps openclaw@2026.10.7
+npm install --no-save --package-lock=false --ignore-scripts --legacy-peer-deps openclaw@2026.11.1
 npm run typecheck
 npm test
 npm run plugin:build
