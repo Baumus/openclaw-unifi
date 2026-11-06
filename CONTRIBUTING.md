@@ -1,6 +1,6 @@
 # Contributing
 
-Use Node 24.16+ (or 26.1+) and the exact OpenClaw 2026.10.5 SDK. See README development commands. Keep changes focused, ESM and modular; runtime imports must be declared production dependencies or focused OpenClaw SDK subpaths.
+Use Node 24.22.1+ (or 26.12.1+) and the exact OpenClaw 2026.11.1 SDK. See README development commands. Keep changes focused, ESM and modular; runtime imports must be declared production dependencies or focused OpenClaw SDK subpaths.
 
 ## API updates
 
