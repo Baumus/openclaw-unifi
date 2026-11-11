@@ -41,7 +41,7 @@
     "node": ">=24.22.1 <25 || >=26.12.1"
   },
   "peerDependencies": {
-    "openclaw": "2026.11.1"
+    "openclaw": ">=2026.11.1 <=2026.11.2"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -75,12 +75,12 @@
       "./dist/index.js"
     ],
     "compat": {
-      "pluginApi": "2026.11.1",
-      "minGatewayVersion": "2026.11.1"
+      "pluginApi": ">=2026.11.1 <=2026.11.2",
+      "minGatewayVersion": ">=2026.11.1 <=2026.11.2"
     },
     "build": {
-      "openclawVersion": "2026.11.1",
-      "pluginSdkVersion": "2026.11.1"
+      "openclawVersion": "2026.11.2",
+      "pluginSdkVersion": "2026.11.2"
     },
     "controlUi": "./src/control-ui.ts"
   }

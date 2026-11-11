@@ -6,6 +6,8 @@ import {join} from "node:path";
 import {fileURLToPath} from "node:url";
 import {createHash} from "node:crypto";
 const root=fileURLToPath(new URL("../",import.meta.url));
+const hostEntry=import.meta.resolve("openclaw/plugin-sdk/plugin-entry");
+const hostVersion=JSON.parse(readFileSync(new URL("../../package.json",hostEntry),"utf8")).version;
 const temporary=mkdtempSync(join(tmpdir(),"openclaw-unifi-pack-"));
 try{
  const filename=execFileSync("npm",["pack","--ignore-scripts","--silent","--pack-destination",temporary],{cwd:root,encoding:"utf8"}).trim();
@@ -38,7 +40,8 @@ try{
  execFileSync("tar",["-xzf",tarball,"-C",temporary]);
  const extracted=join(temporary,"package");
  const pkg=JSON.parse(readFileSync(join(extracted,"package.json")));
- assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,"2026.11.1");
+ assert.equal(pkg.type,"module");assert.deepEqual(pkg.openclaw.extensions,["./dist/index.js"]);assert.equal(pkg.peerDependencies.openclaw,">=2026.11.1 <=2026.11.2");
+ assert.deepEqual(pkg.openclaw.build,{openclawVersion:hostVersion,pluginSdkVersion:hostVersion},"package must record the SDK used for this build");
  assert.deepEqual(Object.keys(pkg.dependencies).sort(),["ajv","ajv-formats","typebox"]);
  assert.equal(readFileSync(join(extracted,"assets/icon.png")).subarray(0,8).toString("hex"),"89504e470d0a1a0a");
  // A clean production dependency project: no source-tree node_modules lookup.
